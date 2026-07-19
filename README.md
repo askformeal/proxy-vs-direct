@@ -28,3 +28,7 @@ python -m venv .venv
 source .venv/Scripts/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
+
+## TODO
+
+See [TODO.md](TODO.md) for planned features.
