@@ -21,13 +21,10 @@ python main.py <url> [-c COUNT] [-t TIMEOUT] [-d DECIMALS]
 python main.py https://www.google.com -c 10 -t 3
 ```
 
-## Requirements
-
-- Python 3.7+
-- `requests` library
-
-Install dependencies:
+## Setup
 
 ```bash
+python -m venv .venv
+source .venv/Scripts/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
