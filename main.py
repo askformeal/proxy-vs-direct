@@ -7,13 +7,16 @@ import sys
 
 
 def is_valid_url(url):
+    """Check if URL is valid (http/https only)."""
     try:
         result = urlparse(url)
         return all([result.scheme in ("http", "https"), result.netloc])
     except ValueError:
         return False
 
+
 def test_url(url, proxies, count, timeout, decimals):
+    """Send requests and measure latency."""
     print(f'>> Testing {url}  ({count} request(s), timeout={timeout}s)')
     for name, address in proxies.items():
         print(f'   proxy[{name}] = {address}')
@@ -53,8 +56,10 @@ def test_url(url, proxies, count, timeout, decimals):
     return average
 
 
+# Get system proxy settings
 sys_proxies = urllib.request.getproxies()
 
+# Parse arguments
 parser = argparse.ArgumentParser(description='Proxy vs Direct')
 parser.add_argument('url', help='Target URL.')
 parser.add_argument('-c', '--count', type=int, default=5, help='Number of requests to send.')
@@ -67,6 +72,7 @@ if not is_valid_url(args.url):
     print('Invalid URL')
     sys.exit()
 
+# Run tests
 print('=' * 50)
 print(f'  PROXY vs DIRECT: {args.count} request(s) each, {args.timeout}s timeout')
 print('=' * 50)
@@ -79,6 +85,7 @@ print()
 
 direct_average = test_url(args.url, {"http": None, "https": None}, args.count, args.timeout, args.decimals)
 
+# Compare results
 print('=' * 50)
 if proxy_average == -1 and direct_average == -1:
     print('  RESULT: Both failed!')
