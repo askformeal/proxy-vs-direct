@@ -98,5 +98,5 @@ elif proxy_average > direct_average:
 elif proxy_average < direct_average:
     print(f'  RESULT: Proxy is faster than direct by {round(direct_average - proxy_average, args.decimals)}ms')
 elif proxy_average == direct_average:
-    print(f'  RESULT: A miracle! Proxy and direct latency are EXACTLY the same at {proxy_average}ms')
+    print(f'  RESULT: A miracle! Proxy and direct latency are EXACTLY the same at {proxy_average}ms. Make sure you get a screenshot of this.')
 print('=' * 50)
