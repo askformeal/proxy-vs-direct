@@ -11,4 +11,5 @@
 - [ ] Add retry on failure
 - [ ] Add support for IP address
 - [ ] Add DNS latency test
+- [ ] Add latency monitor: periodic tests per website, alert on repeated result changes
 - [ ] Add GUI
