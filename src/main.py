@@ -81,8 +81,11 @@ class DirectVsProxy:
     def pk(self, url, proxies):
         ...
 
-    def test_url(self, url, proxies={"http": None, "https": None}, timeout=5, headers={}, decimals=2) -> dict:
+    def test_url(self, url, proxies=None, timeout=5, headers={}, decimals=2) -> dict:
         """Send requests and measure latency for a given URL and proxy config."""
+        if proxies == None:
+            proxies = {"http": None, "https": None}
+
         result = {
             'latency': 0, # -1 = Failed
             'msg': ''
@@ -104,7 +107,7 @@ class DirectVsProxy:
 
         else:
             end = time.time()
-            result['latency'] = (end - start) * 1000
+            result['latency'] = round((end - start) * 1000, decimals)
             result['msg'] = f'Succeeded - Code {code}'
         
         return result
