@@ -11,5 +11,6 @@
 - [ ] Add retry on failure
 - [ ] Add support for IP address
 - [ ] Add DNS latency test
+- [ ] Add full page load test (JS, images, etc.) with render time recording
 - [ ] Add GUI
 - [ ] Add latency monitor: periodic tests per website, track if faster path flips (e.g. proxy→direct) for N consecutive tests, alert user
