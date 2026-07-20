@@ -5,7 +5,7 @@ Compare the latency to a certain URL between proxy and direct connection.
 ## Usage
 
 ```bash
-python main.py <url> [-c COUNT] [-t TIMEOUT] [-d DECIMALS]
+python -m src <url> [-c COUNT] [-t TIMEOUT] [-d DECIMALS]
 ```
 
 ### Arguments
@@ -14,11 +14,12 @@ python main.py <url> [-c COUNT] [-t TIMEOUT] [-d DECIMALS]
 - `-c, --count` — Number of requests to send (default: 5)
 - `-t, --timeout` — Timeout in seconds (default: 5.0)
 - `-d, --decimals` — Number of digits to round (default: 2)
+- `-v, --version` — Show version info
 
 ### Example
 
 ```bash
-python main.py https://www.google.com -c 10 -t 3
+python -m src https://www.google.com -c 10 -t 3
 ```
 
 ## Setup
