@@ -78,60 +78,33 @@ class DirectVsProxy:
         except ValueError:
             return False
 
-    def test_url(self, url, proxies):
+    def pk(self, url, proxies):
+        ...
+
+    def test_url(self, url, proxies={"http": None, "https": None}, timeout=5, headers={}, decimals=2) -> dict:
         """Send requests and measure latency for a given URL and proxy config."""
-
         result = {
-            'latencies': [],
-            'total': self.args.count,
-            'succeeded': 0,
-            'failed': 0,
-            'completed': 0,
-            'average': 0
+            'latency': 0, # -1 = Failed
+            'msg': ''
         }
+        start = time.time()
+        try:
+            code = requests.get(url, timeout=timeout, proxies=proxies, headers=headers).status_code
 
-        headers = {'User-Agent': self.args.user_agent}
+        except requests.RequestException as e:
+            if isinstance(e, requests.exceptions.ConnectTimeout):
+                result['latency'] = -1
+                result['msg'] = 'FAILED - Connection Timeout'
+            elif isinstance(e, requests.exceptions.ConnectionError):
+                result['latency'] = -1
+                result['msg'] = 'FAILED - Connection Failed'
+            else:
+                result['latency'] = -1
+                result['msg'] = f'FAILED - Connection {{type(e).__name__}}'
 
-        print(f'>> Testing {url}  ({self.args.count} request(s), timeout={self.args.timeout}s)')
+        else:
+            end = time.time()
+            result['latency'] = (end - start) * 1000
+            result['msg'] = f'Succeeded - Code {code}'
         
-        for name, address in proxies.items():
-            print(f'   proxy[{name}] = {address}')
-        print('-' * 50)
-
-        try:
-            for i in range(self.args.count):
-                start = time.time()
-                try:
-                    code = requests.get(url, timeout=self.args.timeout, proxies=proxies, headers=headers).status_code
-
-                except requests.RequestException as e:
-                    result['failed'] += 1
-                    if isinstance(e, requests.exceptions.ConnectTimeout):
-                        print(f'  [{i+1:>2}/{self.args.count}] FAILED   - Connection Timeout')
-                    elif isinstance(e, requests.exceptions.ConnectionError):
-                        print(f'  [{i+1:>2}/{self.args.count}] FAILED   - Connection Failed')
-                    else:
-                        print(f'  [{i+1:>2}/{self.args.count}] FAILED   - {type(e).__name__}')
-
-                else:
-                    end = time.time()
-                    latency = (end - start) * 1000
-                    print(f'  [{i+1:>2}/{self.args.count}] OK       - {round(latency, self.args.decimals):>8}ms  (status {code})')
-                    result['latencies'].append(latency)
-                    result['succeeded'] += 1
-                result['completed'] += 1
-
-        except KeyboardInterrupt:
-            print(f'\n  !! Stopped via keyboard interrupt after [{result["completed"]}/{self.args.count}] completed requests')
-
-        print('-' * 50)
-        try:
-            average = round(mean(result['latencies']), self.args.decimals)
-            print(f'  Average latency: {average}ms\n')
-        except StatisticsError:
-            average = -1
-            print(f'  All requests failed\n')
-
-        result['average'] = average
-
         return result
