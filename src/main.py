@@ -118,7 +118,7 @@ class DirectVsProxy:
                 result['completed'] += 1
 
         except KeyboardInterrupt:
-            print(f'\n  !! Stopped via keyboard interrupt after [{result['completed']}/{self.args.count}] completed requests')
+            print(f'\n  !! Stopped via keyboard interrupt after [{result["completed"]}/{self.args.count}] completed requests')
 
         print('-' * 50)
         try:
