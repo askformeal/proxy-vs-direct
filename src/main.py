@@ -11,14 +11,20 @@ class DirectVsProxy:
     def __init__(self):
         self.sys_proxies = urllib.request.getproxies()
 
+
+        DEFAULT_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36'
+        
         parser = argparse.ArgumentParser(description=f'Proxy vs Direct {__version__}')
         parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}', help='Show version info')
         parser.add_argument('url', help='Target URL.')
         parser.add_argument('-c', '--count', type=int, default=5, help='Number of requests to send.')
         parser.add_argument('-t', '--timeout', type=float, default=5.0, help='Timeout in seconds.')
         parser.add_argument('-d', '--decimals', type=int, default=2, help='Number of digits to round.')
+        parser.add_argument('--user-agent', type=str, default=DEFAULT_UA, help='User-Agent to use in request headers')
 
         self.args = parser.parse_args()
+
+
 
         if not self.is_valid_url(self.args.url):
             print('Invalid URL')
@@ -80,6 +86,8 @@ class DirectVsProxy:
             'average': 0
         }
 
+        headers = {'User-Agent': self.args.user_agent}
+
         print(f'>> Testing {url}  ({self.args.count} request(s), timeout={self.args.timeout}s)')
         
         for name, address in proxies.items():
@@ -90,7 +98,7 @@ class DirectVsProxy:
             for i in range(self.args.count):
                 start = time.time()
                 try:
-                    code = requests.get(url, timeout=self.args.timeout, proxies=proxies).status_code
+                    code = requests.get(url, timeout=self.args.timeout, proxies=proxies, headers=headers).status_code
 
                 except requests.RequestException as e:
                     result['failed'] += 1
@@ -110,7 +118,7 @@ class DirectVsProxy:
                 result['completed'] += 1
 
         except KeyboardInterrupt:
-            print(f'\n  !! Stopped via keyboard interrupt after [{i}/{self.args.count}] completed requests')
+            print(f'\n  !! Stopped via keyboard interrupt after [{result['completed']}/{self.args.count}] completed requests')
 
         print('-' * 50)
         try:

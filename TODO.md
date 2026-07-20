@@ -1,6 +1,6 @@
 # TODO
 
-- [ ] Add default and customizable User-Agent
+- [X] Add default and customizable User-Agent
 - [ ] Add customizable HTTP and HTTPS proxy
 - [ ] Add batch test (multiple URLs)
 - [ ] Add output to JSON feature
