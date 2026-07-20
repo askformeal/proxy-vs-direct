@@ -7,12 +7,11 @@ import time
 import argparse
 import sys
 
+DEFAULT_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36'
+
 class DirectVsProxy:
     def __init__(self):
-        self.sys_proxies = urllib.request.getproxies()
-
-
-        DEFAULT_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36'
+        self.proxies = urllib.request.getproxies()
         
         parser = argparse.ArgumentParser(description=f'Proxy vs Direct {__version__}')
         parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}', help='Show version info')
@@ -20,11 +19,16 @@ class DirectVsProxy:
         parser.add_argument('-c', '--count', type=int, default=5, help='Number of requests to send.')
         parser.add_argument('-t', '--timeout', type=float, default=5.0, help='Timeout in seconds.')
         parser.add_argument('-d', '--decimals', type=int, default=2, help='Number of digits to round.')
-        parser.add_argument('--user-agent', type=str, default=DEFAULT_UA, help='User-Agent to use in request headers')
+        parser.add_argument('--user-agent', type=str, default=DEFAULT_UA, help='User-Agent to use in request headers.')
+        parser.add_argument('--http-proxy', type=str, default='default', help='HTTP proxy to use. Use system proxy by default.')
+        parser.add_argument('--https-proxy', type=str, default='default', help='HTTPS proxy to use. Use system proxy by default.')
 
         self.args = parser.parse_args()
 
-
+        if self.args.http_proxy != 'default':
+            self.proxies['http'] = self.args.http_proxy
+        if self.args.https_proxy != 'default':
+            self.proxies['https'] = self.args.https_proxy
 
         if not self.is_valid_url(self.args.url):
             print('Invalid URL')
@@ -37,7 +41,7 @@ class DirectVsProxy:
         print('=' * 50)
         print()
 
-        proxy_result = self.test_url(self.args.url, self.sys_proxies)
+        proxy_result = self.test_url(self.args.url, self.proxies)
         proxy_average = proxy_result['average']
 
         print('=' * 50)
