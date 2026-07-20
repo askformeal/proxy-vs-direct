@@ -11,7 +11,7 @@ DEFAULT_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTM
 
 class DirectVsProxy:
     def __init__(self):
-        self.proxies = urllib.request.getproxies()
+        self.effective_proxies = urllib.request.getproxies()
         
         parser = argparse.ArgumentParser(description=f'Proxy vs Direct {__version__}')
         parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}', help='Show version info')
@@ -26,9 +26,9 @@ class DirectVsProxy:
         self.args = parser.parse_args()
 
         if self.args.http_proxy != 'default':
-            self.proxies['http'] = self.args.http_proxy
+            self.effective_proxies['http'] = self.args.http_proxy
         if self.args.https_proxy != 'default':
-            self.proxies['https'] = self.args.https_proxy
+            self.effective_proxies['https'] = self.args.https_proxy
 
         if not self.is_valid_url(self.args.url):
             print('Invalid URL')
@@ -41,7 +41,7 @@ class DirectVsProxy:
         print('=' * 50)
         print()
 
-        proxy_result = self.test_url(self.args.url, self.proxies)
+        proxy_result = self.test_url(self.args.url, self.effective_proxies)
         proxy_average = proxy_result['average']
 
         print('=' * 50)
