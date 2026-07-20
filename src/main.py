@@ -100,7 +100,7 @@ class DirectVsProxy:
                 result['msg'] = 'FAILED - Connection Failed'
             else:
                 result['latency'] = -1
-                result['msg'] = f'FAILED - Connection {{type(e).__name__}}'
+                result['msg'] = f'FAILED - {type(e).__name__}'
 
         else:
             end = time.time()
