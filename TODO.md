@@ -2,16 +2,20 @@
 
 - [X] Add default and customizable User-Agent
 - [X] Add customizable HTTP and HTTPS proxy
-- [ ] Round-by-round latency PK.
-- [ ] Add batch test (multiple URLs)
+- [ ] Round-by-round latency PK. (Currently developing)
+- [ ] `--rules` option and rules
+- [ ] Add silent mode and output-to-file mode.
+- [ ] Use timer to replace "Waiting..." during PK
+- [ ] Add autofill URL feature.
 - [ ] Add output to JSON feature
-- [ ] Add jitter plot
 - [ ] Add min/max latency statistics
 - [ ] Add progress bar
+- [ ] Add support for IP address
+- [ ] Add full page load test (JS, images, etc.) with render time recording
+- [ ] Add batch test (multiple URLs)
+- [ ] Add jitter plot
 - [ ] Add send requests infinitely until interrupted feature
 - [ ] Add retry on failure
-- [ ] Add support for IP address
 - [ ] Add DNS latency test
-- [ ] Add full page load test (JS, images, etc.) with render time recording
 - [ ] Add GUI
 - [ ] Add latency monitor: periodic tests per website, track if faster path flips (e.g. proxy→direct) for N consecutive tests, alert user
