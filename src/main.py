@@ -27,8 +27,10 @@ class DirectVsProxy:
 
         self.args = parser.parse_args()
 
-        if not self.is_valid_url(self.args.url):
-            print(f'ERROR: Invalid URL: {self.args.url}')
+        raw_url = self.args.url
+        self.args.url = self.validate_url(self.args.url)
+        if self.args.url is None:
+            print(f'ERROR: Invalid URL: {raw_url}')
             sys.exit()
 
         self.headers = {'User-Agent': self.args.user_agent}
@@ -200,13 +202,16 @@ class DirectVsProxy:
         return result
     
     @staticmethod
-    def is_valid_url(url):
-        """Check if URL is valid (http/https only)."""
-        try:
+    def validate_url(url):
+        """Check if URL is valid, auto-add https:// if scheme missing."""
+        result = urlparse(url)
+        if result.scheme == '':
+            url = 'https://' + url
             result = urlparse(url)
-            return all([result.scheme in ("http", "https"), result.netloc])
-        except ValueError:
-            return False
+        if result.scheme in ('http', 'https') and result.netloc and ' ' not in result.netloc:
+            return url
+        return None
+
         
 class _ShowRules(argparse.Action):
     """Print PK rules and exit without requiring URL."""

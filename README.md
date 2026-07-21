@@ -10,7 +10,7 @@ python -m src <url> [-r ROUND] [-t TIMEOUT] [-d DECIMALS] [--rules] [--user-agen
 
 ### Arguments
 
-- `url` — Target URL to test
+- `url` — Target URL to test (auto-adds `https://` if scheme missing)
 - `-r, --round` — Number of rounds to PK (default: 5)
 - `-t, --timeout` — Timeout in seconds (default: 5.0)
 - `-d, --decimals` — Number of digits to round (default: 2)
@@ -24,6 +24,7 @@ python -m src <url> [-r ROUND] [-t TIMEOUT] [-d DECIMALS] [--rules] [--user-agen
 
 ```bash
 python -m src https://www.google.com -r 10 -t 3
+python -m src google.com -r 5
 python -m src https://www.google.com --http-proxy http://127.0.0.1:7897 --https-proxy http://127.0.0.1:7897
 ```
 
