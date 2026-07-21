@@ -4,7 +4,7 @@
 - [X] Add customizable HTTP and HTTPS proxy
 - [X] Round-by-round latency PK.
 - [X] `--rules` option and rules
-- [X] Add autofill URL feature.
+- [X] Add auto complete URL scheme feature.
 - [ ] Add silent mode and output-to-file mode.
 - [ ] Use timer to replace "Waiting..." during PK
 - [ ] Add output to JSON feature
