@@ -101,35 +101,38 @@ class DirectVsProxy:
         start_time = time.time()
         proxy_latencies = []
         direct_latencies = []
-        for i in range(results['total']):
-            self.round_status = {'proxy': None, 'direct': None}
-            print(f"Round [{i+1}/{results['total']}]:")
-            
-            Thread(target=self._start_test, args=('proxy', self.effective_proxies), daemon=True).start()
-            Thread(target=self._start_test, args=('direct', None), daemon=True).start()
-            
-            while True:
+        try:
+            for i in range(results['total']):
+                self.round_status = {'proxy': None, 'direct': None}
+                print(f"Round [{i+1}/{results['total']}]:")
+                
+                Thread(target=self._start_test, args=('proxy', self.effective_proxies), daemon=True).start()
+                Thread(target=self._start_test, args=('direct', None), daemon=True).start()
+                
+                while True:
+                    self.plot._print_round_info(self.round_status)
+                    print('\033[F\033[K', end='') # Delete last line
+                    if self.round_status['proxy'] is not None and self.round_status['direct'] is not None:
+                        break
+                results['completed'] += 1
                 self.plot._print_round_info(self.round_status)
-                print('\033[F\033[K', end='') # Delete last line
-                if self.round_status['proxy'] is not None and self.round_status['direct'] is not None:
-                    break
-            results['completed'] += 1
-            self.plot._print_round_info(self.round_status)
 
-            results['rounds'].append({
-                'number': i+1,
-                'proxy': self.round_status['proxy'],
-                'direct': self.round_status['direct'],
-            })
-            
-            round_result = self.plot._plot_round_result(self.round_status)
-            print(round_result['msg'])
-            results['proxy_score'] += round_result['proxy']
-            results['direct_score'] += round_result['direct']
-            results['tie_count'] += round_result['tie']
+                results['rounds'].append({
+                    'number': i+1,
+                    'proxy': self.round_status['proxy'],
+                    'direct': self.round_status['direct'],
+                })
+                
+                round_result = self.plot._plot_round_result(self.round_status)
+                print(round_result['msg'])
+                results['proxy_score'] += round_result['proxy']
+                results['direct_score'] += round_result['direct']
+                results['tie_count'] += round_result['tie']
 
-            proxy_latencies.append(self.round_status['proxy']['latency'])
-            direct_latencies.append(self.round_status['direct']['latency'])
+                proxy_latencies.append(self.round_status['proxy']['latency'])
+                direct_latencies.append(self.round_status['direct']['latency'])
+        except KeyboardInterrupt:
+            print("PK stopped via keyboard interruption.")
 
         results['proxy_failed'] = proxy_latencies.count(-1)
         results['direct_failed'] = direct_latencies.count(-1)

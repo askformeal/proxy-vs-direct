@@ -2,7 +2,7 @@
 
 - [X] Add default and customizable User-Agent
 - [X] Add customizable HTTP and HTTPS proxy
-- [ ] Round-by-round latency PK. (Currently developing)
+- [X] Round-by-round latency PK.
 - [ ] `--rules` option and rules
 - [ ] Add silent mode and output-to-file mode.
 - [ ] Use timer to replace "Waiting..." during PK
