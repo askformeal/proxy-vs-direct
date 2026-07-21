@@ -12,11 +12,10 @@ import sys
 from src.plot import Plot
 
 DEFAULT_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36'
+PK_REFRESH_INTERVAL = 0.05
 
 class DirectVsProxy:
     def __init__(self):
-        self.effective_proxies = urllib.request.getproxies()
-        
         parser = argparse.ArgumentParser(description=f'Proxy vs Direct {__version__}')
         parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}', help='Show version info')
         parser.add_argument('url', help='Target URL.')
@@ -35,10 +34,20 @@ class DirectVsProxy:
 
         self.headers = {'User-Agent': self.args.user_agent}
         
+        self.effective_proxies = urllib.request.getproxies()
         if self.args.http_proxy != 'default':
             self.effective_proxies['http'] = self.args.http_proxy
         if self.args.https_proxy != 'default':
             self.effective_proxies['https'] = self.args.https_proxy
+
+        if 'http' not in self.effective_proxies.keys():
+            print('WARNING: No system HTTP proxy found, and will use direct connection instead. You may want to define one manually using --http-proxy.')
+            self.effective_proxies['http'] = None
+        
+        if 'https' not in self.effective_proxies.keys():
+            print('WARNING: No system HTTPS proxy found, and will use direct connection instead. You may want to define one manually using --https-proxy.')
+            self.effective_proxies['https'] = None
+        
 
         self.plot = Plot(self.args.decimals)
 
@@ -84,7 +93,11 @@ class DirectVsProxy:
             "direct_average": 0,
             "duration": 0
         }
-
+        if results['http_proxy'] is None:
+            results['http_proxy'] = 'Undefined, using direct connection'
+        if results['https_proxy'] is None:
+            results['https_proxy'] = 'Undefined, using direct connection'
+        
         '''
         when complete: 
         {
@@ -111,6 +124,7 @@ class DirectVsProxy:
                 
                 while True:
                     self.plot._print_round_info(self.round_status)
+                    time.sleep(PK_REFRESH_INTERVAL)
                     print('\033[F\033[K', end='') # Delete last line
                     if self.round_status['proxy'] is not None and self.round_status['direct'] is not None:
                         break
@@ -158,10 +172,13 @@ class DirectVsProxy:
         result = self.test_url(self.args.url, proxies, self.args.timeout, self.headers, self.args.decimals)
         self.round_status[name] = result
 
-    def test_url(self, url, proxies=None, timeout=5, headers={}, decimals=2) -> dict:
+    def test_url(self, url, proxies=None, timeout=5, headers=None, decimals=2) -> dict:
         """Send requests and measure latency for a given URL and proxy config."""
         if proxies is None:
             proxies = {"http": None, "https": None}
+        
+        if headers is None:
+            headers = {}
 
         result = {
             'latency': 0, # -1 = Failed
