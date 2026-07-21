@@ -3,10 +3,10 @@
 - [X] Add default and customizable User-Agent
 - [X] Add customizable HTTP and HTTPS proxy
 - [X] Round-by-round latency PK.
-- [ ] `--rules` option and rules
+- [X] `--rules` option and rules
+- [ ] Add autofill URL feature.
 - [ ] Add silent mode and output-to-file mode.
 - [ ] Use timer to replace "Waiting..." during PK
-- [ ] Add autofill URL feature.
 - [ ] Add output to JSON feature
 - [ ] Add min/max latency statistics
 - [ ] Add progress bar

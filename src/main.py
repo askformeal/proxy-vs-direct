@@ -9,10 +9,8 @@ from datetime import datetime
 import argparse
 import sys
 
+from src.config import DEFAULT_UA, PK_REFRESH_INTERVAL, RULES
 from src.plot import Plot
-
-DEFAULT_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36'
-PK_REFRESH_INTERVAL = 0.05
 
 class DirectVsProxy:
     def __init__(self):
@@ -22,6 +20,7 @@ class DirectVsProxy:
         parser.add_argument('-r', '--round', type=int, default=5, help='Number of rounds to PK.')
         parser.add_argument('-t', '--timeout', type=float, default=5.0, help='Timeout in seconds.')
         parser.add_argument('-d', '--decimals', type=int, default=2, help='Decimal precision.')
+        parser.add_argument('--rules', action=_ShowRules, nargs=0, help='Show PK rules')
         parser.add_argument('--user-agent', type=str, default=DEFAULT_UA, help='User-Agent to use in request headers.')
         parser.add_argument('--http-proxy', type=str, default='default', help='HTTP proxy to use. Use system proxy by default.')
         parser.add_argument('--https-proxy', type=str, default='default', help='HTTPS proxy to use. Use system proxy by default.')
@@ -29,7 +28,7 @@ class DirectVsProxy:
         self.args = parser.parse_args()
 
         if not self.is_valid_url(self.args.url):
-            print('Invalid URL')
+            print(f'ERROR: Invalid URL: {self.args.url}')
             sys.exit()
 
         self.headers = {'User-Agent': self.args.user_agent}
@@ -40,11 +39,13 @@ class DirectVsProxy:
         if self.args.https_proxy != 'default':
             self.effective_proxies['https'] = self.args.https_proxy
 
-        if 'http' not in self.effective_proxies.keys():
+        # fallback to direct if no system proxy found
+        if 'http' not in self.effective_proxies:
             print('WARNING: No system HTTP proxy found, and will use direct connection instead. You may want to define one manually using --http-proxy.')
             self.effective_proxies['http'] = None
         
-        if 'https' not in self.effective_proxies.keys():
+        # fallback to direct if no system proxy found
+        if 'https' not in self.effective_proxies:
             print('WARNING: No system HTTPS proxy found, and will use direct connection instead. You may want to define one manually using --https-proxy.')
             self.effective_proxies['https'] = None
         
@@ -63,15 +64,6 @@ class DirectVsProxy:
         results = self.pk()
         print()
         self.plot._show_pk_result(results)
-
-    @staticmethod
-    def is_valid_url(url):
-        """Check if URL is valid (http/https only)."""
-        try:
-            result = urlparse(url)
-            return all([result.scheme in ("http", "https"), result.netloc])
-        except ValueError:
-            return False
 
     def pk(self):
         results = {
@@ -172,7 +164,8 @@ class DirectVsProxy:
         result = self.test_url(self.args.url, proxies, self.args.timeout, self.headers, self.args.decimals)
         self.round_status[name] = result
 
-    def test_url(self, url, proxies=None, timeout=5, headers=None, decimals=2) -> dict:
+    @staticmethod
+    def test_url(url, proxies=None, timeout=5, headers=None, decimals=2) -> dict:
         """Send requests and measure latency for a given URL and proxy config."""
         if proxies is None:
             proxies = {"http": None, "https": None}
@@ -205,3 +198,18 @@ class DirectVsProxy:
             result['msg'] = f'Code {code}'
         
         return result
+    
+    @staticmethod
+    def is_valid_url(url):
+        """Check if URL is valid (http/https only)."""
+        try:
+            result = urlparse(url)
+            return all([result.scheme in ("http", "https"), result.netloc])
+        except ValueError:
+            return False
+        
+class _ShowRules(argparse.Action):
+    """Print PK rules and exit without requiring URL."""
+    def __call__(self, parser, namespace, values, option_string=None):
+        print(RULES)
+        parser.exit()
