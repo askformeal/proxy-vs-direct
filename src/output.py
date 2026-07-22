@@ -45,22 +45,28 @@ class Output:
             self.__call__(f'Output to file mode must be one of the following: create, overwrite or append, not "{self.write_mode}". Outputs to file will be disabled',
                           skip_file=True)
             self.path = 'disabled'
-        elif not self.file_ready:
-            if os.path.exists(self.path):
-                if self.write_mode == 'create':
+
+        elif self.file_ready:
+            self._write_file(content, 'a')
+        
+        else:
+            if self.write_mode == 'create':
+                if os.path.exists(self.path):   
                     self.__call__(f'Output mode is set to "create" but {self.path} already exists, and outputs to file will be disabled. '
                                 f'You can use --output-mode overwrite or --force option to force overwrite this file or use "append" output mode to append to the end of this file.',
                                 skip_file=True)
                     self.path = 'disabled'
-                elif self.write_mode == 'overwrite':
+                else:
                     self._write_file(content, 'w')
-                
-                elif self.write_mode == 'append':
-                    self._write_file(content, 'a')
-            self.file_ready = True
             
-        else:
-            self._write_file(content, 'a')
+            elif self.write_mode == 'overwrite':
+                self._write_file(content, 'w')
+
+            elif self.write_mode == 'append':
+                self._write_file(content, 'a')
+            
+            self.file_ready = True
+
 
     def __call__(self, *args, force=False, skip_file=False, **kwargs):
         buffer = io.StringIO()
