@@ -68,6 +68,7 @@ class DirectVsProxy:
         if self.args.animation == 'default':
             if not is_atty:
                 output('Non-TTY terminal environment detected. Animations will be disabled. You can use "--animation on" to turn them on if this is a mis-detection')
+                self.args.animation = 'off'
             else:
                 self.args.animation = 'on'
         
@@ -123,7 +124,8 @@ class DirectVsProxy:
         output()
 
         results = self.pk()
-        time.sleep(AFTER_PK_PAUSE)
+        if self.args.animation == 'on':
+            time.sleep(AFTER_PK_PAUSE)
         output()
         self.plot._show_pk_result(results)
 
@@ -185,6 +187,8 @@ class DirectVsProxy:
                         self.plot._print_round_info(self.round_status)
                         time.sleep(PK_REFRESH_INTERVAL)
                         output('\033[F\033[K', end='', skip_file=True) # Delete last line
+                    else:
+                        time.sleep(PK_REFRESH_INTERVAL)
                     if self.round_status['proxy'] is not None and self.round_status['direct'] is not None:
                         break
                 results['completed'] += 1
