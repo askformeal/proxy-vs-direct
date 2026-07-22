@@ -3,7 +3,7 @@ import io
 import sys
 import re
 
-from src.config import ENCODING
+from src.config import ENCODING, ERROR, WARNING, INFO
 
 
 _ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')
@@ -22,14 +22,14 @@ class Output:
         
     def _handle_file_errors(self, e):
         if not self.quiet:
-            print(f'Error: Failed to write into {self.path} because ', end='')
+            self.__call__(f'{WARNING} Failed to write into {self.path} because ', end='', skip_file=True)
             if isinstance(e, PermissionError):
                 print('permission is insufficient', end='')
             elif isinstance(e, IsADirectoryError):
-                print('target path is a directory instead of a file', end='')
+                self.__call__('target path is a directory instead of a file', end='', skip_file=True)
             else:
-                print(f'"{e}"', end='')
-            print('and outputs to file will be disabled.')
+                self.__call__(f'"{e}"', end='', skip_file=True)
+            self.__call__('and outputs to file will be disabled.', skip_file=True)
         self.path = 'disabled'
 
     def _write_file(self, content, mode):
@@ -46,7 +46,7 @@ class Output:
         else:
             if self.write_mode == 'create':
                 if os.path.exists(self.path):   
-                    self.__call__(f'Output mode is set to "create" but {self.path} already exists, and outputs to file will be disabled. '
+                    self.__call__(f'{WARNING} Output mode is set to "create" but {self.path} already exists, and outputs to file will be disabled. '
                                 f'You can use --output-mode overwrite or --force option to force overwrite this file or use "append" output mode to append to the end of this file.',
                                 skip_file=True)
                     self.path = 'disabled'

@@ -6,63 +6,16 @@ from threading import Thread
 import requests
 import time
 from datetime import datetime
-import argparse
 import sys
 
-from src.config import DEFAULT_UA, PK_REFRESH_INTERVAL, AFTER_PK_PAUSE, RULES, BOLD, DIM, CYAN, RESET
+from src.config import DEFAULT_UA, PK_REFRESH_INTERVAL, AFTER_PK_PAUSE, BOLD, DIM, CYAN, RESET, ERROR, WARNING, INFO
+from src.cli import get_args
 from src.output import output
 from src.plot import Plot
 
-def positive_float(val):
-    try:
-        val = float(val)
-    except ValueError:
-        raise argparse.ArgumentTypeError(f'{val} is not a positive float')
-    else:
-        if val <= 0:
-            raise argparse.ArgumentTypeError(f'{val} is not a positive float')
-        return val
-
-def positive_int(val):
-    try:
-        val = int(val)
-    except ValueError:
-        raise argparse.ArgumentTypeError(f'{val} is not a positive integer')
-    else:
-        if val <= 0:
-            raise argparse.ArgumentTypeError(f'{val} is not a positive integer')
-        return val
-
 class DirectVsProxy:
     def __init__(self):
-        parser = argparse.ArgumentParser(
-            prog='proxy-vs-direct', 
-            description=f'Proxy vs Direct {__version__} - Make your proxy and direct connection PK on latency to a certain URL.',
-            epilog='Examples: \n  python -m src https://example.com -r 10\n  python -m src https://example.com --rules',
-            formatter_class=argparse.RawDescriptionHelpFormatter)
-        parser.add_argument('url', help='Target URL.')
-        parser.add_argument('-r', '--round', type=positive_int, default=5, help='Number of rounds to PK.')
-        parser.add_argument('-d', '--decimals', type=positive_int, default=2, help='Decimal precision.')
-        parser.add_argument('--rules', action=_ShowRules, nargs=0, help='Show PK rules')
-        parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}', help='Show version info')
-        
-        group_request = parser.add_argument_group('Request')
-        group_request.add_argument('--user-agent', type=str, default='default', help='User-Agent to use in request headers.')
-        group_request.add_argument('--http-proxy', type=str, default='default', help='HTTP proxy to use. Use system proxy by default.')
-        group_request.add_argument('--https-proxy', type=str, default='default', help='HTTPS proxy to use. Use system proxy by default.')
-        group_request.add_argument('-t', '--timeout', type=positive_float, default=5.0, help='Timeout in seconds.')
-        
-        group_terminal = parser.add_argument_group('Output to Terminal')
-        group_terminal.add_argument('--quiet', action='store_true', help='Disable terminal outputs.')
-        group_terminal.add_argument('--animation', default='default', choices=['default', 'on', 'off'], help='Toggle animations for better compatibility: [on/off]')
-        group_terminal.add_argument('--color', default='default', choices=['default', 'on', 'off'], help='Toggle colors for better compatibility: [on/off]')
-        
-        group_file = parser.add_argument_group('Output to File')
-        group_file.add_argument('--output-file', default='disabled', help='A path of a file to write outputs into.')
-        group_file.add_argument('--output-mode', default='default', choices=['default', 'create', 'overwrite', 'append'], help='Output to file modes: [create/overwrite/append]')
-        group_file.add_argument('-f', '--force', action='store_true', help='Force overwrite all files. Will set output mode to "overwrite" unless manually specified with --output-mode option.')
-
-        self.args = parser.parse_args()
+        self.args = get_args()
 
         output.quiet = self.args.quiet
         output.path = self.args.output_file
@@ -77,14 +30,14 @@ class DirectVsProxy:
         is_atty = sys.stdout.isatty()
         if self.args.animation == 'default':
             if not is_atty:
-                output('Non-TTY terminal environment detected. Animations will be disabled. You can use "--animation on" to turn them on if this is a mis-detection')
+                output(f'{INFO} Non-TTY terminal environment detected. Animations will be disabled. You can use "--animation on" to turn them on if this is a mis-detection')
                 self.args.animation = 'off'
             else:
                 self.args.animation = 'on'
         
         if self.args.color == 'default':
             if not is_atty:
-                output('Non-TTY terminal environment detected. Colors will be disabled. You can use "--color on" to turn them on if this is a mis-detection')
+                output(f'{INFO} Non-TTY terminal environment detected. Colors will be disabled. You can use "--color on" to turn them on if this is a mis-detection')
                 output.no_color = True
             else:
                 output.no_color = False
@@ -94,7 +47,7 @@ class DirectVsProxy:
         raw_url = self.args.url
         self.args.url = self.validate_url(self.args.url)
         if self.args.url is None:
-            output(f'ERROR: Invalid URL: {raw_url}')
+            output(f'{ERROR} Invalid URL: {raw_url}')
             sys.exit()
 
         self.headers = {}
@@ -111,12 +64,12 @@ class DirectVsProxy:
 
         # fallback to direct if no system proxy found
         if 'http' not in self.effective_proxies:
-            output('WARNING: No system HTTP proxy found, and will use direct connection instead. You may want to define one manually using --http-proxy.')
+            output(f'{WARNING} No system HTTP proxy found, and will use direct connection instead. You may want to define one manually using --http-proxy.')
             self.effective_proxies['http'] = None
         
         # fallback to direct if no system proxy found
         if 'https' not in self.effective_proxies:
-            output('WARNING: No system HTTPS proxy found, and will use direct connection instead. You may want to define one manually using --https-proxy.')
+            output(f'{WARNING} No system HTTPS proxy found, and will use direct connection instead. You may want to define one manually using --https-proxy.')
             self.effective_proxies['https'] = None
         
 
@@ -219,7 +172,7 @@ class DirectVsProxy:
                 proxy_latencies.append(self.round_status['proxy']['latency'])
                 direct_latencies.append(self.round_status['direct']['latency'])
         except KeyboardInterrupt:
-            output("PK stopped via keyboard interruption.")
+            output(f"{INFO} PK stopped via keyboard interruption.")
 
         results['proxy_failed'] = proxy_latencies.count(-1)
         results['direct_failed'] = direct_latencies.count(-1)
@@ -285,16 +238,9 @@ class DirectVsProxy:
         """Check if URL is valid, auto-add https:// if scheme missing."""
         result = urlparse(url)
         if result.scheme == '':
-            output('WARNING: No scheme found in give URL, and will use HTTPS scheme. All requests will fail if target server does not support HTTPS scheme.')
+            output(f'{WARNING} No scheme found in give URL, and will use HTTPS scheme. All requests will fail if target server does not support HTTPS scheme.')
             url = 'https://' + url
             result = urlparse(url)
         if result.scheme in ('http', 'https') and result.netloc and ' ' not in result.netloc:
             return url
         return None
-
-        
-class _ShowRules(argparse.Action):
-    """Print PK rules and exit without requiring URL."""
-    def __call__(self, parser, namespace, values, option_string=None):
-        output(RULES)
-        parser.exit()

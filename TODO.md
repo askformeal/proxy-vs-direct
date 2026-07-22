@@ -8,7 +8,7 @@
 - [X] Add silent mode and output-to-file mode.
 - [X] Prettify output.
 - [X] Make real-time round status refresh and colors switchable to support old terminal environments.
-- [ ] Add colored tags (ERROR, WARNING, etc) to all notification-outputs.
+- [X] Add colored prefixes (ERROR, WARNING, etc) to all notification-outputs.
 - [ ] Use timer to replace "Waiting..." during PK
 - [ ] Add output to JSON feature
 - [ ] Add min/max latency statistics
