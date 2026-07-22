@@ -10,7 +10,7 @@ import argparse
 import sys
 
 from src.config import DEFAULT_UA, PK_REFRESH_INTERVAL, RULES
-from src.output import output
+from src.output import output, BOLD, DIM, CYAN, RESET
 from src.plot import Plot
 
 class DirectVsProxy:
@@ -77,9 +77,11 @@ class DirectVsProxy:
 
     def run(self):
         """Run proxy and direct tests, then compare results."""
-        output('=' * 50)
-        output(f'  PROXY vs DIRECT: {self.args.round} request(s) each, {self.args.timeout}s timeout')
-        output('=' * 50)
+        title = f'PROXY vs DIRECT: {self.args.round} request(s) each, {self.args.timeout}s timeout'
+        width = max(len(title) + 4, 50)
+        output(f'{DIM}{"─" * width}{RESET}')
+        output(f'{BOLD}{CYAN}  {title}{RESET}')
+        output(f'{DIM}{"─" * width}{RESET}')
         output()
 
         results = self.pk()

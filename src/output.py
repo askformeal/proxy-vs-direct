@@ -1,8 +1,24 @@
 import os
 import io
 import sys
+import re
 
 from src.config import ENCODING
+
+# ANSI color helpers
+RESET   = '\033[0m'
+BOLD    = '\033[1m'
+DIM     = '\033[2m'
+RED     = '\033[31m'
+GREEN   = '\033[32m'
+YELLOW  = '\033[33m'
+CYAN    = '\033[36m'
+WHITE   = '\033[37m'
+
+_ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')
+
+def strip_ansi(text):
+    return _ANSI_RE.sub('', text)
 
 class Output:
     def __init__(self):
@@ -65,7 +81,7 @@ class Output:
         text = buffer.getvalue()
 
         if self.path != 'disabled' and not skip_file:
-            self._handle_file_write(text)
+            self._handle_file_write(strip_ansi(text))
             
         if not self.quiet or force:
             sys.stdout.write(text)
