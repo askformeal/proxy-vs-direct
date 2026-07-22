@@ -9,16 +9,7 @@ class Output:
         self.quiet = False
         self.path = 'disabled'
         self.force_write = False
-        self.write_mode = 'overwrite'
-        '''
-        create: create a new file, can not overwrite existing one.
-        overwrite: overwrite an existing file or create a new one
-        append: append to the end of a existing or newly created file 
-
-        create: fail if file exists
-        overwrite: overwrite if file exists
-        append: do nothing if file exists
-        '''
+        self.write_mode = 'create'
         self.file_ready = False
         
     def _handle_file_errors(self, e):

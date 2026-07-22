@@ -20,8 +20,11 @@ python -m src <url> [-r ROUND] [-t TIMEOUT] [-d DECIMALS] [--rules] [--user-agen
 - `--https-proxy` — HTTPS proxy to use (default: system proxy)
 - `--quiet` — Suppress terminal output
 - `--output-file PATH` — Write output to a file
-- `--output-mode MODE` — File write mode: create (default, fails if exists), overwrite, append
-- `-f, --force` — Force overwrite all files
+- `--output-mode MODE` — File write mode (requires `--output-file`):
+  - `create` (default) — Create a new file. Fail if file already exists.
+  - `overwrite` — Overwrite existing file or create a new one.
+  - `append` — Append to the end of an existing file, or create a new one.
+- `-f, --force` — Force overwrite all files (sets mode to `overwrite` unless `--output-mode` is specified)
 - `-v, --version` — Show version info
 
 ### Example
