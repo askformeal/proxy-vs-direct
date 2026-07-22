@@ -8,3 +8,4 @@ PK Rules:
   4. If latencies are exactly equal, it is a tie.
   5. Final score = rounds won. Higher score wins the PK.
 '''
+ENCODING = 'utf-8'

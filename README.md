@@ -5,7 +5,7 @@ Compare the latency to a certain URL between proxy and direct connection.
 ## Usage
 
 ```bash
-python -m src <url> [-r ROUND] [-t TIMEOUT] [-d DECIMALS] [--rules] [--user-agent USER_AGENT] [--http-proxy HTTP_PROXY] [--https-proxy HTTPS_PROXY] [--quiet] [--output-file PATH] [--output-overwrite] [-f]
+python -m src <url> [-r ROUND] [-t TIMEOUT] [-d DECIMALS] [--rules] [--user-agent USER_AGENT] [--http-proxy HTTP_PROXY] [--https-proxy HTTPS_PROXY] [--quiet] [--output-file PATH] [--output-mode MODE] [-f]
 ```
 
 ### Arguments
@@ -20,7 +20,7 @@ python -m src <url> [-r ROUND] [-t TIMEOUT] [-d DECIMALS] [--rules] [--user-agen
 - `--https-proxy` — HTTPS proxy to use (default: system proxy)
 - `--quiet` — Suppress terminal output
 - `--output-file PATH` — Write output to a file
-- `--output-overwrite` — Overwrite existing output file
+- `--output-mode MODE` — File write mode: create (default, fails if exists), overwrite, append
 - `-f, --force` — Force overwrite all files
 - `-v, --version` — Show version info
 

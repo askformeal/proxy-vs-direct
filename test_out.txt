@@ -1,0 +1,26 @@
+==================================================
+  PROXY vs DIRECT: 1 request(s) each, 5.0s timeout
+==================================================
+
+Round [1/1]:
+  Proxy: 1646.1ms, Code 200 | Direct: Failed, Connection Timeout
+  Direct Failed!
+
+PK Result 2026-07-22 14:22:10:
+  [1/1] round(s) completed
+  URL: https://www.google.com
+  HTTP Proxy: http://127.0.0.1:7897
+  HTTPS Proxy: http://127.0.0.1:7897
+  Timeout: 5.0s
+  Decimal Precision: 2 decimal place(s)
+  Duration: 10.08s
+  Proxy:
+    Score: 1
+    Failed: [0/1]
+    Average Latency: 1646.1ms
+  Direct:
+    Score: 0
+    Failed: [1/1]
+    Average Latency: -1ms
+Overall:
+  Proxy beat Direct 1-0 with 0 round(s) ended in ties.

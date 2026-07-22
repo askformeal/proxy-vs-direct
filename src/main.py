@@ -27,14 +27,20 @@ class DirectVsProxy:
         parser.add_argument('--https-proxy', type=str, default='default', help='HTTPS proxy to use. Use system proxy by default.')
         parser.add_argument('--quiet', action='store_true', help='Disable terminal outputs.')
         parser.add_argument('--output-file', default='disabled', help='A path of a file to write outputs into.')
-        parser.add_argument('--output-overwrite', action='store_true', help='Force overwrite existing file for --output-file.')
-        parser.add_argument('-f', '--force', action='store_true', help='Force overwrite all files.')
+        parser.add_argument('--output-mode', default='default', help='Output to file modes: [create/overwrite/append]')
+        parser.add_argument('-f', '--force', action='store_true', help='Force overwrite all files. Will set output mode to "overwrite" unless manually specified with --output-mode option.')
 
         self.args = parser.parse_args()
 
         output.quiet = self.args.quiet
         output.path = self.args.output_file
-        output.overwrite = self.args.output_overwrite or self.args.force
+        if self.args.output_mode == 'default':
+            if self.args.force:
+                output.write_mode = 'overwrite'
+            else:
+                output.write_mode = 'create'
+        else:
+            output.write_mode = self.args.output_mode
 
         raw_url = self.args.url
         self.args.url = self.validate_url(self.args.url)

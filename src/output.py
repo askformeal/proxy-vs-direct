@@ -2,11 +2,23 @@ import os
 import io
 import sys
 
+from src.config import ENCODING
+
 class Output:
     def __init__(self):
         self.quiet = False
         self.path = 'disabled'
-        self.overwrite = False
+        self.force_write = False
+        self.write_mode = 'overwrite'
+        '''
+        create: create a new file, can not overwrite existing one.
+        overwrite: overwrite an existing file or create a new one
+        append: append to the end of a existing or newly created file 
+
+        create: fail if file exists
+        overwrite: overwrite if file exists
+        append: do nothing if file exists
+        '''
         self.file_ready = False
         
     def _handle_file_errors(self, e):
@@ -17,33 +29,38 @@ class Output:
             elif isinstance(e, IsADirectoryError):
                 print('target path is a directory instead of a file', end='')
             else:
-                print(f'\"{e}\"', end='')
+                print(f'"{e}"', end='')
             print('and outputs to file will be disabled.')
         self.path = 'disabled'
 
-    def _write_to_file(self, content):
-        if os.path.exists(self.path) and not self.overwrite and not self.file_ready:
-            # path exists, not overwrite and file not prepared
-            self.__call__(f'{self.path} already exists, and outputs to file will be disabled. You can use --output-overwrite or --force option to overwrite this file.',
+    def _write_file(self, content, mode):
+        try:
+            with open(self.path, mode=mode, encoding=ENCODING) as f:
+                f.write(content)
+        except OSError as e:
+            self._handle_file_errors(e)
+
+    def _handle_file_write(self, content):
+        if self.write_mode not in ('overwrite', 'create', 'append'):
+            self.__call__(f'Output to file mode must be one of the following: create, overwrite or append, not "{self.write_mode}". Outputs to file will be disabled',
                           skip_file=True)
             self.path = 'disabled'
-        
         elif not self.file_ready:
-            # file don't exist or should be overwrote. clear/create file.
-            try:
-                with open(self.path, 'w') as f:
-                    ...
-                self.file_ready = True
-            except OSError as e:
-                self._handle_file_errors(e)
-        
+            if os.path.exists(self.path):
+                if self.write_mode == 'create':
+                    self.__call__(f'Output mode is set to "create" but {self.path} already exists, and outputs to file will be disabled. '
+                                f'You can use --output-mode overwrite or --force option to force overwrite this file or use "append" output mode to append to the end of this file.',
+                                skip_file=True)
+                    self.path = 'disabled'
+                elif self.write_mode == 'overwrite':
+                    self._write_file(content, 'w')
+                
+                elif self.write_mode == 'append':
+                    self._write_file(content, 'a')
+            self.file_ready = True
+            
         else:
-            # file is ready. write it.
-            try:
-                with open(self.path, 'a') as f:
-                    f.write(content)
-            except OSError as e:
-                self._handle_file_errors(e)
+            self._write_file(content, 'a')
 
     def __call__(self, *args, force=False, skip_file=False, **kwargs):
         buffer = io.StringIO()
@@ -51,7 +68,7 @@ class Output:
         text = buffer.getvalue()
 
         if self.path != 'disabled' and not skip_file:
-            self._write_to_file(text)
+            self._handle_file_write(text)
             
         if not self.quiet or force:
             sys.stdout.write(text)
