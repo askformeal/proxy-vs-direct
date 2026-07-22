@@ -37,7 +37,7 @@ class DirectVsProxy:
     def __init__(self):
         parser = argparse.ArgumentParser(
             prog='proxy-vs-direct', 
-            description=f'Proxy vs Direct {__version__} - Make your proxy and direction connection PK on latency to a certain URL.',
+            description=f'Proxy vs Direct {__version__} - Make your proxy and direct connection PK on latency to a certain URL.',
             epilog='Examples: \n  python -m src https://example.com -r 10\n  python -m src https://example.com --rules',
             formatter_class=argparse.RawDescriptionHelpFormatter)
         parser.add_argument('url', help='Target URL.')
