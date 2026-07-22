@@ -29,7 +29,7 @@ class Plot:
         colors = {-1: RED, 0: YELLOW, 1: GREEN}
         
         diff = proxy_score - direct_score
-        proxy_color = colors[(diff>0) - (diff<0)]
+        proxy_color = colors[(diff>0) - (diff<0)] # True==1, False==0
         output(f'  {proxy_color}{BOLD}Proxy{RESET}')
         output(f'    {DIM}Score:{RESET}   {proxy_color}{proxy_score}{RESET}')
         output(f'    {DIM}Failed:{RESET}  [{results["proxy_failed"]}/{results["completed"]}]')
@@ -38,7 +38,7 @@ class Plot:
 
         # Direct stats
         diff = direct_score - proxy_score
-        direct_color = colors[(diff>0) - (diff<0)]
+        direct_color = colors[(diff>0) - (diff<0)] # True==1, False==0
         output(f'  {direct_color}{BOLD}Direct{RESET}')
         output(f'    {DIM}Score:{RESET}   {direct_color}{direct_score}{RESET}')
         output(f'    {DIM}Failed:{RESET}  [{results["direct_failed"]}/{results["completed"]}]')
