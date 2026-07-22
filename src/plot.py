@@ -1,4 +1,5 @@
-from src.output import output, BOLD, DIM, RED, GREEN, YELLOW, CYAN, RESET
+from src.output import output
+from src.config import BOLD, DIM, RED, GREEN, YELLOW, CYAN, RESET
 
 class Plot:
     def __init__(self, decimals):

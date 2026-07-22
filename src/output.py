@@ -5,15 +5,6 @@ import re
 
 from src.config import ENCODING
 
-# ANSI color helpers
-RESET   = '\033[0m'
-BOLD    = '\033[1m'
-DIM     = '\033[2m'
-RED     = '\033[31m'
-GREEN   = '\033[32m'
-YELLOW  = '\033[33m'
-CYAN    = '\033[36m'
-WHITE   = '\033[37m'
 
 _ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')
 
@@ -27,6 +18,7 @@ class Output:
         self.force_write = False
         self.write_mode = 'create'
         self.file_ready = False
+        self.no_color = False
         
     def _handle_file_errors(self, e):
         if not self.quiet:
@@ -43,17 +35,12 @@ class Output:
     def _write_file(self, content, mode):
         try:
             with open(self.path, mode=mode, encoding=ENCODING) as f:
-                f.write(content)
+                f.write(strip_ansi(content))
         except OSError as e:
             self._handle_file_errors(e)
 
     def _handle_file_write(self, content):
-        if self.write_mode not in ('overwrite', 'create', 'append'):
-            self.__call__(f'Output to file mode must be one of the following: create, overwrite or append, not "{self.write_mode}". Outputs to file will be disabled',
-                          skip_file=True)
-            self.path = 'disabled'
-
-        elif self.file_ready:
+        if self.file_ready:
             self._write_file(content, 'a')
         
         else:
@@ -81,8 +68,11 @@ class Output:
         text = buffer.getvalue()
 
         if self.path != 'disabled' and not skip_file:
-            self._handle_file_write(strip_ansi(text))
-            
+            self._handle_file_write(text)
+
+        if self.no_color:
+            text = strip_ansi(text)
+
         if not self.quiet or force:
             sys.stdout.write(text)
 

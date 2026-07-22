@@ -5,7 +5,7 @@ Compare the latency to a certain URL between proxy and direct connection.
 ## Usage
 
 ```bash
-python -m src <url> [-r ROUND] [-t TIMEOUT] [-d DECIMALS] [--rules] [--user-agent USER_AGENT] [--http-proxy HTTP_PROXY] [--https-proxy HTTPS_PROXY] [--quiet] [--output-file PATH] [--output-mode MODE] [-f]
+python -m src <url> [-r ROUND] [-t TIMEOUT] [-d DECIMALS] [--rules] [--user-agent USER_AGENT] [--http-proxy HTTP_PROXY] [--https-proxy HTTPS_PROXY] [--quiet] [--output-file PATH] [--output-mode MODE] [-f] [--animation {on,off}] [--color {on,off}]
 ```
 
 ### Arguments
@@ -25,6 +25,8 @@ python -m src <url> [-r ROUND] [-t TIMEOUT] [-d DECIMALS] [--rules] [--user-agen
   - `overwrite` — Overwrite existing file or create a new one.
   - `append` — Append to the end of an existing file, or create a new one.
 - `-f, --force` — Force overwrite all files (sets mode to `overwrite` unless `--output-mode` is specified)
+- `--animation` — Toggle real-time round status animation: `on` or `off` (auto-detected for TTY)
+- `--color` — Toggle ANSI colors: `on` or `off` (auto-detected for TTY)
 - `-v, --version` — Show version info
 
 ### Example

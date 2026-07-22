@@ -6,8 +6,8 @@
 - [X] `--rules` option and rules
 - [X] Add auto complete URL scheme feature.
 - [X] Add silent mode and output-to-file mode.
-- [ ] Prettify output.
-- [ ] Make real-time round status refresh switchable to support old terminal environments.
+- [X] Prettify output.
+- [X] Make real-time round status refresh and colors switchable to support old terminal environments.
 - [ ] Use timer to replace "Waiting..." during PK
 - [ ] Add output to JSON feature
 - [ ] Add min/max latency statistics

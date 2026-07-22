@@ -9,26 +9,48 @@ from datetime import datetime
 import argparse
 import sys
 
-from src.config import DEFAULT_UA, PK_REFRESH_INTERVAL, RULES
-from src.output import output, BOLD, DIM, CYAN, RESET
+from src.config import DEFAULT_UA, PK_REFRESH_INTERVAL, AFTER_PK_PAUSE, RULES, BOLD, DIM, CYAN, RESET
+from src.output import output
 from src.plot import Plot
+
+def positive_float(val):
+    try:
+        val = float(val)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f'{val} is not a positive float')
+    else:
+        if val <= 0:
+            raise argparse.ArgumentTypeError(f'{val} is not a positive float')
+        return val
+
+def positive_int(val):
+    try:
+        val = int(val)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f'{val} is not a positive integer')
+    else:
+        if val <= 0:
+            raise argparse.ArgumentTypeError(f'{val} is not a positive integer')
+        return val
 
 class DirectVsProxy:
     def __init__(self):
         parser = argparse.ArgumentParser(description=f'Proxy vs Direct {__version__}')
         parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}', help='Show version info')
         parser.add_argument('url', help='Target URL.')
-        parser.add_argument('-r', '--round', type=int, default=5, help='Number of rounds to PK.')
-        parser.add_argument('-t', '--timeout', type=float, default=5.0, help='Timeout in seconds.')
-        parser.add_argument('-d', '--decimals', type=int, default=2, help='Decimal precision.')
+        parser.add_argument('-r', '--round', type=positive_int, default=5, help='Number of rounds to PK.')
+        parser.add_argument('-t', '--timeout', type=positive_float, default=5.0, help='Timeout in seconds.')
+        parser.add_argument('-d', '--decimals', type=positive_int, default=2, help='Decimal precision.')
         parser.add_argument('--rules', action=_ShowRules, nargs=0, help='Show PK rules')
         parser.add_argument('--user-agent', type=str, default='default', help='User-Agent to use in request headers.')
         parser.add_argument('--http-proxy', type=str, default='default', help='HTTP proxy to use. Use system proxy by default.')
         parser.add_argument('--https-proxy', type=str, default='default', help='HTTPS proxy to use. Use system proxy by default.')
         parser.add_argument('--quiet', action='store_true', help='Disable terminal outputs.')
         parser.add_argument('--output-file', default='disabled', help='A path of a file to write outputs into.')
-        parser.add_argument('--output-mode', default='default', help='Output to file modes: [create/overwrite/append]')
+        parser.add_argument('--output-mode', default='default', choices=['default', 'create', 'overwrite', 'append'], help='Output to file modes: [create/overwrite/append]')
         parser.add_argument('-f', '--force', action='store_true', help='Force overwrite all files. Will set output mode to "overwrite" unless manually specified with --output-mode option.')
+        parser.add_argument('--animation', default='default', choices=['default', 'on', 'off'], help='Toggle animations for better compatibility: [on/off]')
+        parser.add_argument('--color', default='default', choices=['default', 'on', 'off'], help='Toggle colors for better compatibility: [on/off]')
 
         self.args = parser.parse_args()
 
@@ -41,6 +63,22 @@ class DirectVsProxy:
                 output.write_mode = 'create'
         else:
             output.write_mode = self.args.output_mode
+        
+        is_atty = sys.stdout.isatty()
+        if self.args.animation == 'default':
+            if not is_atty:
+                output('Non-TTY terminal environment detected. Animations will be disabled. You can use "--animation on" to turn them on if this is a mis-detection')
+            else:
+                self.args.animation = 'on'
+        
+        if self.args.color == 'default':
+            if not is_atty:
+                output('Non-TTY terminal environment detected. Colors will be disabled. You can use "--color on" to turn them on if this is a mis-detection')
+                output.no_color = True
+            else:
+                output.no_color = False
+        else:
+            output.no_color = {'on': False, 'off': True}[self.args.color]
 
         raw_url = self.args.url
         self.args.url = self.validate_url(self.args.url)
@@ -85,6 +123,7 @@ class DirectVsProxy:
         output()
 
         results = self.pk()
+        time.sleep(AFTER_PK_PAUSE)
         output()
         self.plot._show_pk_result(results)
 
@@ -132,15 +171,20 @@ class DirectVsProxy:
         try:
             for i in range(results['total']):
                 self.round_status = {'proxy': None, 'direct': None}
-                output(f"Round [{i+1}/{results['total']}]:")
+                output(f"Round [{i+1}/{results['total']}]", end='')
+                if self.args.animation == 'on':
+                    output(':')
+                else:
+                    output(' waiting...')
                 
                 Thread(target=self._start_test, args=('proxy', self.effective_proxies), daemon=True).start()
                 Thread(target=self._start_test, args=('direct', None), daemon=True).start()
                 
                 while True:
-                    self.plot._print_round_info(self.round_status)
-                    time.sleep(PK_REFRESH_INTERVAL)
-                    output('\033[F\033[K', end='', skip_file=True) # Delete last line
+                    if self.args.animation == 'on':
+                        self.plot._print_round_info(self.round_status)
+                        time.sleep(PK_REFRESH_INTERVAL)
+                        output('\033[F\033[K', end='', skip_file=True) # Delete last line
                     if self.round_status['proxy'] is not None and self.round_status['direct'] is not None:
                         break
                 results['completed'] += 1
