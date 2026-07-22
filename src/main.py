@@ -10,6 +10,7 @@ import argparse
 import sys
 
 from src.config import DEFAULT_UA, PK_REFRESH_INTERVAL, RULES
+from src.output import output
 from src.plot import Plot
 
 class DirectVsProxy:
@@ -21,19 +22,31 @@ class DirectVsProxy:
         parser.add_argument('-t', '--timeout', type=float, default=5.0, help='Timeout in seconds.')
         parser.add_argument('-d', '--decimals', type=int, default=2, help='Decimal precision.')
         parser.add_argument('--rules', action=_ShowRules, nargs=0, help='Show PK rules')
-        parser.add_argument('--user-agent', type=str, default=DEFAULT_UA, help='User-Agent to use in request headers.')
+        parser.add_argument('--user-agent', type=str, default='default', help='User-Agent to use in request headers.')
         parser.add_argument('--http-proxy', type=str, default='default', help='HTTP proxy to use. Use system proxy by default.')
         parser.add_argument('--https-proxy', type=str, default='default', help='HTTPS proxy to use. Use system proxy by default.')
+        parser.add_argument('--quiet', action='store_true', help='Disable terminal outputs.')
+        parser.add_argument('--output-file', default='disabled', help='A path of a file to write outputs into.')
+        parser.add_argument('--output-overwrite', action='store_true', help='Force overwrite existing file for --output-file.')
+        parser.add_argument('-f', '--force', action='store_true', help='Force overwrite all files.')
 
         self.args = parser.parse_args()
+
+        output.quiet = self.args.quiet
+        output.path = self.args.output_file
+        output.overwrite = self.args.output_overwrite or self.args.force
 
         raw_url = self.args.url
         self.args.url = self.validate_url(self.args.url)
         if self.args.url is None:
-            print(f'ERROR: Invalid URL: {raw_url}')
+            output(f'ERROR: Invalid URL: {raw_url}')
             sys.exit()
 
-        self.headers = {'User-Agent': self.args.user_agent}
+        self.headers = {}
+        if self.args.user_agent == 'default':
+            self.headers['User-Agent'] = DEFAULT_UA
+        else:
+            self.headers['User-Agent'] = self.args.user_agent
         
         self.effective_proxies = urllib.request.getproxies()
         if self.args.http_proxy != 'default':
@@ -43,12 +56,12 @@ class DirectVsProxy:
 
         # fallback to direct if no system proxy found
         if 'http' not in self.effective_proxies:
-            print('WARNING: No system HTTP proxy found, and will use direct connection instead. You may want to define one manually using --http-proxy.')
+            output('WARNING: No system HTTP proxy found, and will use direct connection instead. You may want to define one manually using --http-proxy.')
             self.effective_proxies['http'] = None
         
         # fallback to direct if no system proxy found
         if 'https' not in self.effective_proxies:
-            print('WARNING: No system HTTPS proxy found, and will use direct connection instead. You may want to define one manually using --https-proxy.')
+            output('WARNING: No system HTTPS proxy found, and will use direct connection instead. You may want to define one manually using --https-proxy.')
             self.effective_proxies['https'] = None
         
 
@@ -58,13 +71,13 @@ class DirectVsProxy:
 
     def run(self):
         """Run proxy and direct tests, then compare results."""
-        print('=' * 50)
-        print(f'  PROXY vs DIRECT: {self.args.round} request(s) each, {self.args.timeout}s timeout')
-        print('=' * 50)
-        print()
+        output('=' * 50)
+        output(f'  PROXY vs DIRECT: {self.args.round} request(s) each, {self.args.timeout}s timeout')
+        output('=' * 50)
+        output()
 
         results = self.pk()
-        print()
+        output()
         self.plot._show_pk_result(results)
 
     def pk(self):
@@ -111,7 +124,7 @@ class DirectVsProxy:
         try:
             for i in range(results['total']):
                 self.round_status = {'proxy': None, 'direct': None}
-                print(f"Round [{i+1}/{results['total']}]:")
+                output(f"Round [{i+1}/{results['total']}]:")
                 
                 Thread(target=self._start_test, args=('proxy', self.effective_proxies), daemon=True).start()
                 Thread(target=self._start_test, args=('direct', None), daemon=True).start()
@@ -119,11 +132,11 @@ class DirectVsProxy:
                 while True:
                     self.plot._print_round_info(self.round_status)
                     time.sleep(PK_REFRESH_INTERVAL)
-                    print('\033[F\033[K', end='') # Delete last line
+                    output('\033[F\033[K', end='', skip_file=True) # Delete last line
                     if self.round_status['proxy'] is not None and self.round_status['direct'] is not None:
                         break
                 results['completed'] += 1
-                self.plot._print_round_info(self.round_status)
+                self.plot._print_round_info(self.round_status, skip_file=False)
 
                 results['rounds'].append({
                     'number': i+1,
@@ -132,7 +145,7 @@ class DirectVsProxy:
                 })
                 
                 round_result = self.plot._plot_round_result(self.round_status)
-                print(round_result['msg'])
+                output(round_result['msg'])
                 results['proxy_score'] += round_result['proxy']
                 results['direct_score'] += round_result['direct']
                 results['tie_count'] += round_result['tie']
@@ -140,7 +153,7 @@ class DirectVsProxy:
                 proxy_latencies.append(self.round_status['proxy']['latency'])
                 direct_latencies.append(self.round_status['direct']['latency'])
         except KeyboardInterrupt:
-            print("PK stopped via keyboard interruption.")
+            output("PK stopped via keyboard interruption.")
 
         results['proxy_failed'] = proxy_latencies.count(-1)
         results['direct_failed'] = direct_latencies.count(-1)
@@ -206,6 +219,7 @@ class DirectVsProxy:
         """Check if URL is valid, auto-add https:// if scheme missing."""
         result = urlparse(url)
         if result.scheme == '':
+            output('WARNING: No scheme found in give URL, and will use HTTPS scheme. All requests will fail if target server does not support HTTPS scheme.')
             url = 'https://' + url
             result = urlparse(url)
         if result.scheme in ('http', 'https') and result.netloc and ' ' not in result.netloc:
@@ -216,5 +230,5 @@ class DirectVsProxy:
 class _ShowRules(argparse.Action):
     """Print PK rules and exit without requiring URL."""
     def __call__(self, parser, namespace, values, option_string=None):
-        print(RULES)
+        output(RULES)
         parser.exit()

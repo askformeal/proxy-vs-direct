@@ -1,3 +1,5 @@
+from src.output import output
+
 class Plot:
     def __init__(self, decimals):
         self.decimals = decimals
@@ -8,34 +10,34 @@ class Plot:
         proxy_score = results['proxy_score']
         direct_score = results['direct_score']
 
-        print(f'PK Result {results["time"]}:')
+        output(f'PK Result {results["time"]}:')
 
-        print(f'  [{results["completed"]}/{results["total"]}] round(s) completed')
-        print(f'  URL: {results["url"]}')
-        print(f'  HTTP Proxy: {results["http_proxy"]}')
-        print(f'  HTTPS Proxy: {results["https_proxy"]}')
-        print(f'  Timeout: {results["timeout"]}s')
-        print(f'  Decimal Precision: {results["decimals"]} decimal place(s)')
-        print(f'  Duration: {results["duration"]}s')
+        output(f'  [{results["completed"]}/{results["total"]}] round(s) completed')
+        output(f'  URL: {results["url"]}')
+        output(f'  HTTP Proxy: {results["http_proxy"]}')
+        output(f'  HTTPS Proxy: {results["https_proxy"]}')
+        output(f'  Timeout: {results["timeout"]}s')
+        output(f'  Decimal Precision: {results["decimals"]} decimal place(s)')
+        output(f'  Duration: {results["duration"]}s')
 
-        print('  Proxy:')
-        print(f'    Score: {proxy_score}')
-        print(f'    Failed: [{results["proxy_failed"]}/{results["completed"]}]')
-        print(f'    Average Latency: {proxy_average}ms')
+        output('  Proxy:')
+        output(f'    Score: {proxy_score}')
+        output(f'    Failed: [{results["proxy_failed"]}/{results["completed"]}]')
+        output(f'    Average Latency: {proxy_average}ms')
         
-        print('  Direct:')
-        print(f'    Score: {direct_score}')
-        print(f'    Failed: [{results["direct_failed"]}/{results["completed"]}]')
-        print(f'    Average Latency: {direct_average}ms')
+        output('  Direct:')
+        output(f'    Score: {direct_score}')
+        output(f'    Failed: [{results["direct_failed"]}/{results["completed"]}]')
+        output(f'    Average Latency: {direct_average}ms')
 
-        print('Overall:')
+        output('Overall:')
         if proxy_score > direct_score:
-            print(f'  Proxy beat Direct {proxy_score}-{direct_score}', end='')
+            output(f'  Proxy beat Direct {proxy_score}-{direct_score}', end='')
         elif direct_score > proxy_score:
-            print(f'  Direct beat Proxy {direct_score}-{proxy_score}', end='')
+            output(f'  Direct beat Proxy {direct_score}-{proxy_score}', end='')
         elif proxy_score == direct_score:
-            print(f'  Proxy tied Direct {proxy_score}-{direct_score}', end='')
-        print(f' with {results["tie_count"]} round(s) ended in ties.')
+            output(f'  Proxy tied Direct {proxy_score}-{direct_score}', end='')
+        output(f' with {results["tie_count"]} round(s) ended in ties.')
 
     def _plot_round_result(self, round_status) -> dict:
         proxy_latency = round_status['proxy']['latency']
@@ -75,10 +77,10 @@ class Plot:
 
         return round_result
     
-    def _print_round_info(self, round_status):
+    def _print_round_info(self, round_status, skip_file=True):
         proxy_info = self._gen_round_info('Proxy', round_status['proxy'])
         direct_info = self._gen_round_info('Direct', round_status['direct'])
-        print(f'  {proxy_info} | {direct_info}')
+        output(f'  {proxy_info} | {direct_info}', skip_file=skip_file)
 
     def _gen_round_info(self, name, status):
         if status is None:

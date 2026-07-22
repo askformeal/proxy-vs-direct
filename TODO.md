@@ -5,7 +5,9 @@
 - [X] Round-by-round latency PK.
 - [X] `--rules` option and rules
 - [X] Add auto complete URL scheme feature.
-- [ ] Add silent mode and output-to-file mode.
+- [X] Add silent mode and output-to-file mode.
+- [ ] Add bracelets to round winner's name.
+- [ ] Make real-time round status refresh switchable to support old terminal environments.
 - [ ] Use timer to replace "Waiting..." during PK
 - [ ] Add output to JSON feature
 - [ ] Add min/max latency statistics
