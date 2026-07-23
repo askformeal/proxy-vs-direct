@@ -62,7 +62,7 @@ def get_args():
     parser.add_argument('-r', '--round', type=positive_int, default=5, help='Number of rounds to PK.')
     parser.add_argument('-d', '--decimals', type=positive_int, default=2, help='Decimal precision.')
     parser.add_argument('--rules', action=_ShowRules, nargs=0, help='Show PK rules')
-    parser.add_argument('-h', '--help', action=_OnHelp, nargs=0, help='Show this help message and exit')
+    parser.add_argument('-h', '--help', action=_HelpAction, nargs=0, help='Show this help message and exit')
     parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}', help='Show version info')
     
     group_request = parser.add_argument_group('Request')
