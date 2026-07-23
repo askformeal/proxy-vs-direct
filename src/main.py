@@ -14,7 +14,7 @@ from src.plot import Plot
 
 class DirectVsProxy:
     def __init__(self):
-        self.args = get_args()
+        self.args, help_msg = get_args()
 
         output.quiet = self.args.quiet
         output.path = self.args.output_file
@@ -42,6 +42,10 @@ class DirectVsProxy:
                 output.no_color = False
         else:
             output.no_color = {'on': False, 'off': True}[self.args.color]
+
+        if self.args.help:
+            output(help_msg)
+            sys.exit()
 
         self.headers = {}
         if self.args.user_agent == 'default':

@@ -42,17 +42,27 @@ class _ShowRules(argparse.Action):
         output(RULES)
         parser.exit()
 
+class _HelpAction(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string = None):
+        setattr(namespace, self.dest, True)
+        for action in parser._actions:
+            if action.dest == 'url':
+                action.required = False
+
+
 def get_args():
-    parser = argparse.ArgumentParser(
-        prog='proxy-vs-direct', 
-        description=f'{CYAN}{HELP_BANNER}{RESET}Proxy vs Direct {__version__} - Make your proxy and direct connection PK on latency to a certain URL.',
-        epilog='Examples: \n  python -m src https://example.com -r 10\n  python -m src https://example.com --rules',
-        formatter_class=argparse.RawDescriptionHelpFormatter)
-    
+    parser = argparse.ArgumentParser(prog='proxy-vs-direct',
+                                     description=f'{CYAN}{HELP_BANNER}{RESET}Proxy vs Direct {__version__} - Make your proxy and direct connection PK on latency to a certain URL.',
+                                     epilog='Examples: \n  python -m src https://example.com -r 10\n  python -m src https://example.com --rules',
+                                     formatter_class=argparse.RawDescriptionHelpFormatter,
+                                     add_help=False
+                                     )
+
     parser.add_argument('url', type=valid_url, help='Target URL.')
     parser.add_argument('-r', '--round', type=positive_int, default=5, help='Number of rounds to PK.')
     parser.add_argument('-d', '--decimals', type=positive_int, default=2, help='Decimal precision.')
     parser.add_argument('--rules', action=_ShowRules, nargs=0, help='Show PK rules')
+    parser.add_argument('-h', '--help', action=_OnHelp, nargs=0, help='Show this help message and exit')
     parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}', help='Show version info')
     
     group_request = parser.add_argument_group('Request')
@@ -71,4 +81,4 @@ def get_args():
     group_file.add_argument('--output-mode', default='default', choices=['default', 'create', 'overwrite', 'append'], help='Output to file modes: [create/overwrite/append]')
     group_file.add_argument('-f', '--force', action='store_true', help='Force overwrite all files. Will set output mode to "overwrite" unless manually specified with --output-mode option.')
 
-    return parser.parse_args()
+    return (parser.parse_args(), parser.format_help())
