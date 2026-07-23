@@ -2,10 +2,12 @@ from src import __version__
 import urllib.request
 from statistics import mean, StatisticsError
 from threading import Thread
-import requests
 import time
 from datetime import datetime
 import sys
+
+import requests
+from plyer import notification
 
 from src.config import DEFAULT_UA, PK_REFRESH_INTERVAL, AFTER_PK_PAUSE, BOLD, DIM, CYAN, RESET, ERROR, WARNING, INFO
 from src.cli import Parser
@@ -90,6 +92,8 @@ class DirectVsProxy:
             time.sleep(AFTER_PK_PAUSE)
         output()
         self.plot._show_pk_result(results)
+        if self.args.notify:
+            notification.notify(title='Proxy vs Direct', message='PK completed')
 
     def pk(self):
         results = {
@@ -143,10 +147,10 @@ class DirectVsProxy:
                 
                 Thread(target=self._start_test, args=('proxy', self.effective_proxies), daemon=True).start()
                 Thread(target=self._start_test, args=('direct', None), daemon=True).start()
-                
+                round_start_time = time.time()
                 while True:
                     if self.args.animation == 'on':
-                        self.plot._print_round_info(self.round_status)
+                        self.plot._print_round_info(self.round_status, start_time=round_start_time)
                         time.sleep(PK_REFRESH_INTERVAL)
                         output('\033[F\033[K', end='', skip_file=True) # Delete last line
                     else:

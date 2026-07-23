@@ -26,6 +26,6 @@ ERROR = f'{RED}{BOLD}ERROR:{RESET}'
 WARNING = f'{YELLOW}WARNING:{RESET}'
 INFO = f'{DIM}INFO:{RESET}'
 
-AFTER_PK_PAUSE = 2
+AFTER_PK_PAUSE = 1
 
 HELP_BANNER =  pyfiglet.figlet_format('P vs D', font='ansi_shadow', width=200)

@@ -1,5 +1,6 @@
 from src.output import output
 from src.config import BOLD, DIM, RED, GREEN, YELLOW, CYAN, RESET
+import time
 
 class Plot:
     def __init__(self, decimals):
@@ -94,14 +95,15 @@ class Plot:
 
         return round_result
 
-    def _print_round_info(self, round_status, skip_file=True):
-        proxy_info = self._gen_round_info('Proxy', round_status['proxy'])
-        direct_info = self._gen_round_info('Direct', round_status['direct'])
+    def _print_round_info(self, round_status, skip_file=True, start_time=0):
+        proxy_info = self._gen_round_info('Proxy', round_status['proxy'], start_time)
+        direct_info = self._gen_round_info('Direct', round_status['direct'], start_time)
         output(f'  {proxy_info} | {direct_info}', skip_file=skip_file)
 
-    def _gen_round_info(self, name, status):
+    def _gen_round_info(self, name, status, start_time):
         if status is None:
-            return f'{DIM}{name}: Waiting...{RESET}'
+            duration = round((time.time()-start_time) * 1000, self.decimals)
+            return f'{name}: {DIM}{duration}ms{RESET}'
         else:
             if status['latency'] != -1:
                 return f'{BOLD}{name}{RESET}: {status["latency"]}ms, {DIM}{status["msg"]}{RESET}'

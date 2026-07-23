@@ -60,27 +60,28 @@ class Parser(argparse.ArgumentParser):
                          )
 
         self.add_argument('url', type=valid_url, help='Target URL.')
-        self.add_argument('-r', '--round', type=positive_int, default=5, help='Number of rounds to PK.')
-        self.add_argument('-d', '--decimals', type=positive_int, default=2, help='Decimal precision.')
+        self.add_argument('-r', '--round', type=positive_int, default=5, help='Number of rounds to PK')
+        self.add_argument('-d', '--decimals', type=positive_int, default=2, help='Decimal precision')
         self.add_argument('--rules', action=_ShowRules, nargs=0, help='Show PK rules')
+        self.add_argument('-n', '--notify', action='store_true', help='Send system notify on completion')
         self.add_argument('-h', '--help', action=_HelpAction, nargs=0, help='Show this help message and exit')
         self.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}', help='Show version info')
 
         group_request = self.add_argument_group('Request')
-        group_request.add_argument('--user-agent', type=str, default='default', help='User-Agent to use in request headers.')
-        group_request.add_argument('--http-proxy', type=str, default='default', help='HTTP proxy to use. Use system proxy by default.')
-        group_request.add_argument('--https-proxy', type=str, default='default', help='HTTPS proxy to use. Use system proxy by default.')
-        group_request.add_argument('-t', '--timeout', type=positive_float, default=5.0, help='Timeout in seconds.')
+        group_request.add_argument('--user-agent', type=str, default='default', help='User-Agent to use in request headers')
+        group_request.add_argument('--http-proxy', type=str, default='default', help='HTTP proxy to use. Use system proxy by default')
+        group_request.add_argument('--https-proxy', type=str, default='default', help='HTTPS proxy to use. Use system proxy by default')
+        group_request.add_argument('-t', '--timeout', type=positive_float, default=5.0, help='Timeout in seconds')
 
         group_terminal = self.add_argument_group('Output to Terminal')
-        group_terminal.add_argument('--quiet', action='store_true', help='Disable terminal outputs.')
+        group_terminal.add_argument('--quiet', action='store_true', help='Disable terminal outputs')
         group_terminal.add_argument('--animation', default='default', choices=['default', 'on', 'off'], help='Toggle animations for better compatibility: [on/off]')
         group_terminal.add_argument('--color', default='default', choices=['default', 'on', 'off'], help='Toggle colors for better compatibility: [on/off]')
 
         group_file = self.add_argument_group('Output to File')
-        group_file.add_argument('--output-file', default='disabled', help='A path of a file to write outputs into.')
+        group_file.add_argument('--output-file', default='disabled', help='A path of a file to write outputs into')
         group_file.add_argument('--output-mode', default='default', choices=['default', 'create', 'overwrite', 'append'], help='Output to file modes: [create/overwrite/append]')
-        group_file.add_argument('-f', '--force', action='store_true', help='Force overwrite all files. Will set output mode to "overwrite" unless manually specified with --output-mode option.')
+        group_file.add_argument('-f', '--force', action='store_true', help='Force overwrite all files. Will set output mode to "overwrite" unless manually specified with --output-mode option')
 
     def get_args(self):
         return self.parse_args()

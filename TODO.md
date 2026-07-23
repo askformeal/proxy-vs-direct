@@ -9,13 +9,13 @@
 - [X] Prettify output.
 - [X] Make real-time round status refresh and colors switchable to support old terminal environments.
 - [X] Add colored prefixes (ERROR, WARNING, etc) to all notification-outputs.
-- [ ] Add ASCII art banner in --help description
-- [ ] Add send system notification on completion feature
-- [ ] Add text-based "screenshots" to README
-- [ ] Use timer to replace "Waiting..." during PK
+- [X] Add ASCII art banner in --help description
+- [X] Add text-based "screenshots" to README
+- [X] Add send system notification on completion feature
+- [X] Use timer to replace "Waiting..." during PK
 - [ ] Add output to JSON feature
-- [ ] Add min/max latency statistics
 - [ ] Add progress bar
+- [ ] Add min/max latency statistics
 - [ ] Add support for IP address
 - [ ] Add full page load test (JS, images, etc.) with render time recording
 - [ ] Add batch test (multiple URLs)
