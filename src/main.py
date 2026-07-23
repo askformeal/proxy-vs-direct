@@ -93,7 +93,10 @@ class DirectVsProxy:
         output()
         self.plot._show_pk_result(results)
         if self.args.notify:
-            notification.notify(title='Proxy vs Direct', message='PK completed')
+            try:
+                notification.notify(title='Proxy vs Direct', message='PK completed')
+            except Exception as e:
+                output(f'{WARNING} Failed to send system notification: {type(e).__name__}')
 
     def pk(self):
         results = {

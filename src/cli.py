@@ -59,7 +59,7 @@ class Parser(argparse.ArgumentParser):
                          add_help=False
                          )
 
-        self.add_argument('url', type=valid_url, help='Target URL.')
+        self.add_argument('url', type=valid_url, metavar='[url]', help='Target URL.')
         self.add_argument('-r', '--round', type=positive_int, default=5, help='Number of rounds to PK')
         self.add_argument('-d', '--decimals', type=positive_int, default=2, help='Decimal precision')
         self.add_argument('--rules', action=_ShowRules, nargs=0, help='Show PK rules')
