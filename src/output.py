@@ -87,12 +87,12 @@ class Output:
             sys.stdout.write(text)
 
     def error(self, *args, **kwargs):
-        self.__call__(*args, prefix=ERROR, output_type='error')
+        self.__call__(*args, prefix=ERROR, output_type='error', **kwargs)
 
     def warning(self, *args, **kwargs):
-        self.__call__(*args, prefix=WARNING, output_type='warning')
+        self.__call__(*args, prefix=WARNING, output_type='warning', **kwargs)
 
     def info(self, *args, **kwargs):
-        self.__call__(*args, prefix=INFO, output_type='info')
+        self.__call__(*args, prefix=INFO, output_type='info', **kwargs)
 
 output = Output()
