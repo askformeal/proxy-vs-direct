@@ -1,3 +1,5 @@
+import os
+
 from src import __version__
 import urllib.request
 from statistics import mean, StatisticsError
@@ -5,6 +7,7 @@ from threading import Thread
 import time
 from datetime import datetime
 import sys
+import json
 
 import requests
 from plyer import notification
@@ -22,6 +25,7 @@ class DirectVsProxy:
 
         output.quiet = self.args.quiet
         output.path = self.args.output_file
+
         if self.args.output_mode == 'default':
             if self.args.force:
                 output.write_mode = 'overwrite'
@@ -29,6 +33,9 @@ class DirectVsProxy:
                 output.write_mode = 'create'
         else:
             output.write_mode = self.args.output_mode
+
+        if self.args.force:
+            self.args.overwrite_json = True
         
         is_atty = sys.stdout.isatty()
         if self.args.animation == 'default':
@@ -88,10 +95,28 @@ class DirectVsProxy:
         output()
 
         results = self.pk()
+
         if self.args.animation == 'on':
             time.sleep(AFTER_PK_PAUSE)
         output()
         self.plot._show_pk_result(results)
+
+        if self.args.json != 'undefined':
+            if os.path.exists(self.args.json) and not self.args.overwrite_json:
+                output(f'Failed to write into {self.args.json} because it already exists. You can use --overwrite-json option or --force option to overwrite this file.')
+            else:
+                try:
+                    with open(self.args.json, 'w') as f:
+                        json.dump(results, f)
+                except Exception as e:
+                    output(f'{WARNING} Failed to write into {self.args.json} because ', end='')
+                    if isinstance(e, PermissionError):
+                        output('permission is insufficient.')
+                    elif isinstance(e, IsADirectoryError):
+                        output('target path is a directory instead of a file.')
+                    else:
+                        output(f'\"{e}\".')
+
         if self.args.notify:
             try:
                 notification.notify(title='Proxy vs Direct', message='PK completed')

@@ -13,7 +13,8 @@
 - [X] Add text-based "screenshots" to README
 - [X] Add send system notification on completion feature
 - [X] Use timer to replace "Waiting..." during PK
-- [ ] Add output to JSON feature
+- [X] Add output to JSON feature
+- [ ] Add `--encoding option
 - [ ] Add progress bar
 - [ ] Add min/max latency statistics
 - [ ] Add support for IP address

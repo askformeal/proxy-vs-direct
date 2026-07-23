@@ -29,12 +29,12 @@ def valid_url(url):
         """Check if URL is valid, auto-add https:// if scheme missing."""
         result = urlparse(url)
         if result.scheme == '':
-            output(f'{WARNING} No scheme found in give URL, and will use HTTPS scheme. All requests will fail if target server does not support HTTPS scheme.')
+            output(f'{WARNING} No scheme found in given URL, and will use HTTPS scheme. All requests will fail if target server does not support HTTPS scheme.')
             url = 'https://' + url
             result = urlparse(url)
         if result.scheme in ('http', 'https') and result.netloc and ' ' not in result.netloc:
             return url
-        raise argparse.ArgumentTypeError(f'{url} is not a valid URL')
+        raise argparse.ArgumentTypeError(f'{url} is not a valid URL.')
 
 class _ShowRules(argparse.Action):
     """Print PK rules and exit without requiring URL."""
@@ -81,7 +81,9 @@ class Parser(argparse.ArgumentParser):
         group_file = self.add_argument_group('Output to File')
         group_file.add_argument('--output-file', default='disabled', help='A path of a file to write outputs into')
         group_file.add_argument('--output-mode', default='default', choices=['default', 'create', 'overwrite', 'append'], help='Output to file modes: [create/overwrite/append]')
-        group_file.add_argument('-f', '--force', action='store_true', help='Force overwrite all files. Will set output mode to "overwrite" unless manually specified with --output-mode option')
+        group_file.add_argument('-f', '--force', action='store_true', help='Force overwrite all files. Will set output mode to "overwrite" unless manually specified with --output-mode option and overwrite existing json file')
+        group_file.add_argument('-j', '--json', default='undefined', help='A path of a json file to write PK result into')
+        group_file.add_argument('--overwrite-json', action='store_true', help='Overwrite existing json file')
 
     def get_args(self):
         return self.parse_args()

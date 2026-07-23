@@ -47,7 +47,7 @@ class Output:
             if self.write_mode == 'create':
                 if os.path.exists(self.path):   
                     self.__call__(f'{WARNING} Output mode is set to "create" but {self.path} already exists, and outputs to file will be disabled. '
-                                f'You can use --output-mode overwrite or --force option to force overwrite this file or use "append" output mode to append to the end of this file.',
+                                f'You can use --output-mode overwrite or --force option to overwrite this file or use "append" output mode to append to the end of this file.',
                                 skip_file=True)
                     self.path = 'disabled'
                 else:
