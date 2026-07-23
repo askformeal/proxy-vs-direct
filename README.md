@@ -5,7 +5,7 @@ Compare the latency to a certain URL between proxy and direct connection.
 ## Usage
 
 ```bash
-python -m src <url> [-r ROUND] [-t TIMEOUT] [-d DECIMALS] [--rules] [--user-agent USER_AGENT] [--http-proxy HTTP_PROXY] [--https-proxy HTTPS_PROXY] [--quiet] [--output-file PATH] [--output-mode MODE] [-f] [--animation {on,off}] [--color {on,off}]
+python -m src <url> [-r ROUND] [-t TIMEOUT] [-d DECIMALS] [--rules] [--user-agent USER_AGENT] [--http-proxy HTTP_PROXY] [--https-proxy HTTPS_PROXY] [-n] [--quiet] [--output-file PATH] [--output-mode MODE] [-f] [-j JSON_PATH] [--overwrite-json] [--animation {on,off}] [--color {on,off}]
 ```
 
 ### Arguments
@@ -24,7 +24,10 @@ python -m src <url> [-r ROUND] [-t TIMEOUT] [-d DECIMALS] [--rules] [--user-agen
   - `create` (default) — Create a new file. Fail if file already exists.
   - `overwrite` — Overwrite existing file or create a new one.
   - `append` — Append to the end of an existing file, or create a new one.
-- `-f, --force` — Force overwrite all files (sets mode to `overwrite` unless `--output-mode` is specified)
+- `-f, --force` — Force overwrite all files (sets mode to `overwrite` unless `--output-mode` is specified, and overwrites existing JSON file)
+- `-j, --json PATH` — Write PK result to a JSON file
+- `--overwrite-json` — Overwrite existing JSON file (or use `-f`)
+- `-n, --notify` — Send system notification on completion
 - `--animation` — Toggle real-time round status animation: `on` or `off` (auto-detected for TTY)
 - `--color` — Toggle ANSI colors: `on` or `off` (auto-detected for TTY)
 - `-v, --version` — Show version info
@@ -36,19 +39,21 @@ python -m src https://www.google.com -r 10 -t 3
 python -m src google.com -r 5
 python -m src https://www.google.com --http-proxy http://127.0.0.1:7897 --https-proxy http://127.0.0.1:7897
 python -m src https://www.google.com --quiet --output-file result.txt
+python -m src https://www.google.com -j result.json
 ```
 
 ## Screenshots
 
 ### Help
 ```
-usage: proxy-vs-direct [-r ROUND] [-d DECIMALS] [--rules] [-h] [-v]
+usage: proxy-vs-direct [-r ROUND] [-d DECIMALS] [--rules] [-n] [-h] [-v]
                        [--user-agent USER_AGENT] [--http-proxy HTTP_PROXY]
                        [--https-proxy HTTPS_PROXY] [-t TIMEOUT] [--quiet]
                        [--animation {default,on,off}]
                        [--color {default,on,off}] [--output-file OUTPUT_FILE]
                        [--output-mode {default,create,overwrite,append}] [-f]
-                       url
+                       [-j JSON] [--overwrite-json]
+                       [url]
 
 ██████╗     ██╗   ██╗███████╗    ██████╗
 ██╔══██╗    ██║   ██║██╔════╝    ██╔══██╗
@@ -57,7 +62,7 @@ usage: proxy-vs-direct [-r ROUND] [-d DECIMALS] [--rules] [-h] [-v]
 ██║          ╚████╔╝ ███████║    ██████╔╝
 ╚═╝           ╚═══╝  ╚══════╝    ╚═════╝
 
-Proxy vs Direct 0.4.5 - Make your proxy and direct connection PK on latency to a certain URL.
+Proxy vs Direct 0.5.0 - Make your proxy and direct connection PK on latency to a certain URL.
 
 positional arguments:
   url                   Target URL.
@@ -68,6 +73,8 @@ options:
   -d DECIMALS, --decimals DECIMALS
                         Decimal precision.
   --rules               Show PK rules
+  -n, --notify          Send system notify on completion
+  --encoding ENCODING   File encoding for output (default: utf-8)
   -h, --help            Show this help message and exit
   -v, --version         Show version info
 
@@ -95,7 +102,9 @@ Output to File:
                         Output to file modes: [create/overwrite/append]
   -f, --force           Force overwrite all files. Will set output mode to
                         "overwrite" unless manually specified with --output-
-                        mode option.
+                        mode option and overwrite existing json file.
+  -j JSON, --json JSON  A path of a json file to write PK result into.
+  --overwrite-json      Overwrite existing json file.
 
 Examples:
   python -m src https://example.com -r 10

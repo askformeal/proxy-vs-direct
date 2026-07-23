@@ -14,7 +14,10 @@
 - [X] Add send system notification on completion feature
 - [X] Use timer to replace "Waiting..." during PK
 - [X] Add output to JSON feature
-- [ ] Add `--encoding option
+- [X] Add `--encoding option
+- [ ] Add auto use wide or narrow banner depends on terminal width feature
+- [ ] Add config file
+- [ ] Add customizable connect and read timeout
 - [ ] Add progress bar
 - [ ] Add min/max latency statistics
 - [ ] Add support for IP address
@@ -25,5 +28,7 @@
 - [ ] Add retry on failure
 - [ ] Add DNS latency test
 - [ ] Add multi-language support
+- [ ] Add multiple and customizable connection contest (Clash of Connections).
 - [ ] Add GUI
 - [ ] Add latency monitor: periodic tests per website, track if faster path flips (e.g. proxy→direct) for N consecutive tests, alert user
+- [ ] Add auto-update Clash Verge rules feature (Clash of Clash)

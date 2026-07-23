@@ -12,7 +12,9 @@ import json
 import requests
 from plyer import notification
 
-from src.config import DEFAULT_UA, PK_REFRESH_INTERVAL, AFTER_PK_PAUSE, BOLD, DIM, CYAN, RESET, ERROR, WARNING, INFO
+from src.config import DEFAULT_ANIMATION, DEFAULT_COLOR, DEFAULT_ENCODING, DEFAULT_OUTPUT_MODE, DEFAULT_UA
+from src.config import PK_REFRESH_INTERVAL, AFTER_PK_PAUSE
+from src.config import BOLD, DIM, CYAN, RESET
 from src.cli import Parser
 from src.output import output
 from src.plot import Plot
@@ -23,36 +25,42 @@ class DirectVsProxy:
         self.args = parser.get_args()
         help_msg = parser.get_help_msg()
 
+
         output.quiet = self.args.quiet
         output.path = self.args.output_file
+        if self.args.encoding == 'default':
+            output.encoding = DEFAULT_ENCODING
+        else:
+            output.encoding = self.args.encoding
 
         if self.args.output_mode == 'default':
             if self.args.force:
                 output.write_mode = 'overwrite'
             else:
-                output.write_mode = 'create'
+                output.write_mode = DEFAULT_OUTPUT_MODE
         else:
             output.write_mode = self.args.output_mode
 
         if self.args.force:
             self.args.overwrite_json = True
+
         
         is_atty = sys.stdout.isatty()
         if self.args.animation == 'default':
             if not is_atty:
-                output(f'{INFO} Non-TTY terminal environment detected. Animations will be disabled. You can use "--animation on" to turn them on if this is a mis-detection')
+                output.info('Non-TTY terminal environment detected. Animations will be disabled. You can use "--animation on" to turn them on if this is a mis-detection')
                 self.args.animation = 'off'
             else:
-                self.args.animation = 'on'
+                self.args.animation = DEFAULT_ANIMATION
         
         if self.args.color == 'default':
             if not is_atty:
-                output(f'{INFO} Non-TTY terminal environment detected. Colors will be disabled. You can use "--color on" to turn them on if this is a mis-detection')
-                output.no_color = True
+                output.info('Non-TTY terminal environment detected. Colors will be disabled. You can use "--color on" to turn them on if this is a mis-detection')
+                output.color = False
             else:
-                output.no_color = False
+                output.color = DEFAULT_COLOR
         else:
-            output.no_color = {'on': False, 'off': True}[self.args.color]
+            output.color = {'on': True, 'off': False}[self.args.color]
 
         if self.args.help:
             output(help_msg)
@@ -72,12 +80,12 @@ class DirectVsProxy:
 
         # fallback to direct if no system proxy found
         if 'http' not in self.effective_proxies:
-            output(f'{WARNING} No system HTTP proxy found, and will use direct connection instead. You may want to define one manually using --http-proxy.')
+            output.warning('No system HTTP proxy found, and will use direct connection instead. You may want to define one manually using --http-proxy.')
             self.effective_proxies['http'] = None
         
         # fallback to direct if no system proxy found
         if 'https' not in self.effective_proxies:
-            output(f'{WARNING} No system HTTPS proxy found, and will use direct connection instead. You may want to define one manually using --https-proxy.')
+            output.warning('No system HTTPS proxy found, and will use direct connection instead. You may want to define one manually using --https-proxy.')
             self.effective_proxies['https'] = None
         
 
@@ -103,25 +111,25 @@ class DirectVsProxy:
 
         if self.args.json != 'undefined':
             if os.path.exists(self.args.json) and not self.args.overwrite_json:
-                output(f'Failed to write into {self.args.json} because it already exists. You can use --overwrite-json option or --force option to overwrite this file.')
+                output.warning(f'Failed to write into {self.args.json} because it already exists. You can use --overwrite-json option or --force option to overwrite this file.')
             else:
                 try:
-                    with open(self.args.json, 'w') as f:
+                    with open(self.args.json, 'w', encoding=self.args.encoding) as f:
                         json.dump(results, f)
-                except Exception as e:
-                    output(f'{WARNING} Failed to write into {self.args.json} because ', end='')
+                except OSError as e:
+                    output.warning(f'Failed to write into {self.args.json} because ', end='')
                     if isinstance(e, PermissionError):
-                        output('permission is insufficient.')
+                        output('permission is insufficient.', output_type='warning')
                     elif isinstance(e, IsADirectoryError):
-                        output('target path is a directory instead of a file.')
+                        output('target path is a directory instead of a file.', output_type='warning')
                     else:
-                        output(f'\"{e}\".')
+                        output(f'\"{e}\".', output_type='warning')
 
         if self.args.notify:
             try:
                 notification.notify(title='Proxy vs Direct', message='PK completed')
             except Exception as e:
-                output(f'{WARNING} Failed to send system notification: {type(e).__name__}')
+                output.warning(f'Failed to send system notification: {type(e).__name__}')
 
     def pk(self):
         results = {
@@ -203,7 +211,7 @@ class DirectVsProxy:
                 proxy_latencies.append(self.round_status['proxy']['latency'])
                 direct_latencies.append(self.round_status['direct']['latency'])
         except KeyboardInterrupt:
-            output(f"{INFO} PK stopped via keyboard interruption.")
+            output.info("PK stopped via keyboard interruption.")
 
         results['proxy_failed'] = proxy_latencies.count(-1)
         results['direct_failed'] = direct_latencies.count(-1)

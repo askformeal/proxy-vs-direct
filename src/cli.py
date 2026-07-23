@@ -1,7 +1,7 @@
 import argparse
 from urllib.parse import urlparse
 from src.output import output
-from src.config import RULES, HELP_BANNER, CYAN, RESET, WARNING
+from src.config import RULES, HELP_BANNER, CYAN, RESET
 
 from src import __version__
 
@@ -29,7 +29,7 @@ def valid_url(url):
         """Check if URL is valid, auto-add https:// if scheme missing."""
         result = urlparse(url)
         if result.scheme == '':
-            output(f'{WARNING} No scheme found in given URL, and will use HTTPS scheme. All requests will fail if target server does not support HTTPS scheme.')
+            output.warning('No scheme found in given URL, and will use HTTPS scheme. All requests will fail if target server does not support HTTPS scheme.')
             url = 'https://' + url
             result = urlparse(url)
         if result.scheme in ('http', 'https') and result.netloc and ' ' not in result.netloc:
@@ -64,6 +64,7 @@ class Parser(argparse.ArgumentParser):
         self.add_argument('-d', '--decimals', type=positive_int, default=2, help='Decimal precision')
         self.add_argument('--rules', action=_ShowRules, nargs=0, help='Show PK rules')
         self.add_argument('-n', '--notify', action='store_true', help='Send system notify on completion')
+        self.add_argument('--encoding', default='default', help='File encoding for output (default: utf-8)')
         self.add_argument('-h', '--help', action=_HelpAction, nargs=0, help='Show this help message and exit')
         self.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}', help='Show version info')
 

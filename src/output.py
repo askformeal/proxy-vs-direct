@@ -3,7 +3,8 @@ import io
 import sys
 import re
 
-from src.config import ENCODING, ERROR, WARNING, INFO
+from src.config import ERROR, WARNING, INFO
+from src.config import FORCE_OUTPUT_ERROR, FORCE_OUTPUT_WARNING, FORCE_OUTPUT_INFO
 
 
 _ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')
@@ -18,23 +19,24 @@ class Output:
         self.force_write = False
         self.write_mode = 'create'
         self.file_ready = False
-        self.no_color = False
+        self.color = True
+        self.encoding = 'utf-8'
         
     def _handle_file_errors(self, e):
         if not self.quiet:
-            self.__call__(f'{WARNING} Failed to write into {self.path} because ', end='', skip_file=True)
+            self.warning(f'Failed to write into {self.path} because ', end='', skip_file=True)
             if isinstance(e, PermissionError):
-                self.__call__('permission is insufficient', end='', skip_file=True)
+                self.__call__('permission is insufficient', end='', skip_file=True, output_type='warning')
             elif isinstance(e, IsADirectoryError):
-                self.__call__('target path is a directory instead of a file', end='', skip_file=True)
+                self.__call__('target path is a directory instead of a file', end='', skip_file=True, output_type='warning')
             else:
-                self.__call__(f'"{e}"', end='', skip_file=True)
-            self.__call__('and outputs to file will be disabled.', skip_file=True)
+                self.__call__(f'"{e}"', end='', skip_file=True, output_type='warning')
+            self.__call__('and outputs to file will be disabled.', skip_file=True, output_type='warning')
         self.path = 'disabled'
 
     def _write_file(self, content, mode):
         try:
-            with open(self.path, mode=mode, encoding=ENCODING) as f:
+            with open(self.path, mode=mode, encoding=self.encoding) as f:
                 f.write(strip_ansi(content))
         except OSError as e:
             self._handle_file_errors(e)
@@ -62,18 +64,35 @@ class Output:
             self.file_ready = True
 
 
-    def __call__(self, *args, force=False, skip_file=False, **kwargs):
+    def __call__(self, *args, force=False, skip_file=False, prefix='', output_type='normal', **kwargs): #types: normal, error, warning, info
+        type_force_output_filter = {
+            'normal': False,
+            'error': FORCE_OUTPUT_ERROR,
+            'warning': FORCE_OUTPUT_WARNING,
+            'info': FORCE_OUTPUT_INFO
+        }
+
         buffer = io.StringIO()
         print(*args, file=buffer, **kwargs)
         text = buffer.getvalue()
+        text = f'{prefix}{text}'
 
         if self.path != 'disabled' and not skip_file:
             self._handle_file_write(text)
 
-        if self.no_color:
+        if not self.color:
             text = strip_ansi(text)
 
-        if not self.quiet or force:
+        if not self.quiet or force or type_force_output_filter[output_type]:
             sys.stdout.write(text)
+
+    def error(self, *args, **kwargs):
+        self.__call__(*args, prefix=ERROR, output_type='error')
+
+    def warning(self, *args, **kwargs):
+        self.__call__(*args, prefix=WARNING, output_type='warning')
+
+    def info(self, *args, **kwargs):
+        self.__call__(*args, prefix=INFO, output_type='info')
 
 output = Output()
