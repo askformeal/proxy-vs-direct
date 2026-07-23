@@ -12,7 +12,7 @@ python -m src <url> [-r ROUND] [-t TIMEOUT] [-d DECIMALS] [--rules] [--user-agen
 
 - `url` — Target URL to test (auto-adds `https://` if scheme missing)
 - `-r, --round` — Number of rounds to PK (default: 5)
-- `-t, --timeout` — Timeout in seconds (default: 5.0)
+- `-t, --timeout` — Timeout in seconds (default: 5.0). Note: this value is split between connect timeout and read timeout (each gets half), so the actual maximum wait time per request may be up to 2x the value you set.
 - `-d, --decimals` — Number of digits to round (default: 2)
 - `--rules` — Show PK rules
 - `--user-agent` — Custom User-Agent header (default: Chrome 137)
