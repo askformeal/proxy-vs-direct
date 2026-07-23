@@ -1,6 +1,5 @@
 from src import __version__
 import urllib.request
-from urllib.parse import urlparse
 from statistics import mean, StatisticsError
 from threading import Thread
 import requests
@@ -43,12 +42,6 @@ class DirectVsProxy:
                 output.no_color = False
         else:
             output.no_color = {'on': False, 'off': True}[self.args.color]
-
-        raw_url = self.args.url
-        self.args.url = self.validate_url(self.args.url)
-        if self.args.url is None:
-            output(f'{ERROR} Invalid URL: {raw_url}')
-            sys.exit()
 
         self.headers = {}
         if self.args.user_agent == 'default':
@@ -232,15 +225,3 @@ class DirectVsProxy:
             result['msg'] = f'Code {code}'
         
         return result
-    
-    @staticmethod
-    def validate_url(url):
-        """Check if URL is valid, auto-add https:// if scheme missing."""
-        result = urlparse(url)
-        if result.scheme == '':
-            output(f'{WARNING} No scheme found in give URL, and will use HTTPS scheme. All requests will fail if target server does not support HTTPS scheme.')
-            url = 'https://' + url
-            result = urlparse(url)
-        if result.scheme in ('http', 'https') and result.netloc and ' ' not in result.netloc:
-            return url
-        return None

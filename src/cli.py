@@ -1,6 +1,7 @@
 import argparse
+from urllib.parse import urlparse
 from src.output import output
-from src.config import RULES
+from src.config import RULES, HELP_BANNER, CYAN, RESET, WARNING
 
 from src import __version__
 
@@ -24,6 +25,17 @@ def positive_int(val):
             raise argparse.ArgumentTypeError(f'{val} is not a positive integer')
         return val
 
+def valid_url(url):
+        """Check if URL is valid, auto-add https:// if scheme missing."""
+        result = urlparse(url)
+        if result.scheme == '':
+            output(f'{WARNING} No scheme found in give URL, and will use HTTPS scheme. All requests will fail if target server does not support HTTPS scheme.')
+            url = 'https://' + url
+            result = urlparse(url)
+        if result.scheme in ('http', 'https') and result.netloc and ' ' not in result.netloc:
+            return url
+        raise argparse.ArgumentTypeError(f'{url} is not a valid URL')
+
 class _ShowRules(argparse.Action):
     """Print PK rules and exit without requiring URL."""
     def __call__(self, parser, namespace, values, option_string=None):
@@ -33,11 +45,11 @@ class _ShowRules(argparse.Action):
 def get_args():
     parser = argparse.ArgumentParser(
         prog='proxy-vs-direct', 
-        description=f'Proxy vs Direct {__version__} - Make your proxy and direct connection PK on latency to a certain URL.',
+        description=f'{CYAN}{HELP_BANNER}{RESET}Proxy vs Direct {__version__} - Make your proxy and direct connection PK on latency to a certain URL.',
         epilog='Examples: \n  python -m src https://example.com -r 10\n  python -m src https://example.com --rules',
         formatter_class=argparse.RawDescriptionHelpFormatter)
     
-    parser.add_argument('url', help='Target URL.')
+    parser.add_argument('url', type=valid_url, help='Target URL.')
     parser.add_argument('-r', '--round', type=positive_int, default=5, help='Number of rounds to PK.')
     parser.add_argument('-d', '--decimals', type=positive_int, default=2, help='Decimal precision.')
     parser.add_argument('--rules', action=_ShowRules, nargs=0, help='Show PK rules')

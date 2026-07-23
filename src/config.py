@@ -1,3 +1,5 @@
+import pyfiglet
+
 DEFAULT_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36'
 PK_REFRESH_INTERVAL = 0.05 # seconds between status refresh during PK
 RULES = '''\
@@ -25,3 +27,5 @@ WARNING = f'{YELLOW}WARNING:{RESET}'
 INFO = f'{DIM}INFO:{RESET}'
 
 AFTER_PK_PAUSE = 2
+
+HELP_BANNER =  pyfiglet.figlet_format('P vs D', font='ansi_shadow', width=200)

@@ -9,6 +9,9 @@
 - [X] Prettify output.
 - [X] Make real-time round status refresh and colors switchable to support old terminal environments.
 - [X] Add colored prefixes (ERROR, WARNING, etc) to all notification-outputs.
+- [ ] Add ASCII art banner in --help description
+- [ ] Add send system notification on completion feature
+- [ ] Add text-based "screenshots" to README
 - [ ] Use timer to replace "Waiting..." during PK
 - [ ] Add output to JSON feature
 - [ ] Add min/max latency statistics
@@ -20,5 +23,6 @@
 - [ ] Add send requests infinitely until interrupted feature
 - [ ] Add retry on failure
 - [ ] Add DNS latency test
+- [ ] Add multi-language support
 - [ ] Add GUI
 - [ ] Add latency monitor: periodic tests per website, track if faster path flips (e.g. proxy→direct) for N consecutive tests, alert user

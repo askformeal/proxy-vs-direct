@@ -24,7 +24,7 @@ class Output:
         if not self.quiet:
             self.__call__(f'{WARNING} Failed to write into {self.path} because ', end='', skip_file=True)
             if isinstance(e, PermissionError):
-                print('permission is insufficient', end='')
+                self.__call__('permission is insufficient', end='', skip_file=True)
             elif isinstance(e, IsADirectoryError):
                 self.__call__('target path is a directory instead of a file', end='', skip_file=True)
             else:
