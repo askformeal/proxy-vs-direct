@@ -1,7 +1,8 @@
 import argparse
+import os
 from urllib.parse import urlparse
 from src.output import output
-from src.config import RULES, HELP_BANNER, CYAN, RESET
+from src.config import RULES, HELP_BANNER_NARROW, HELP_BANNER_WIDE, CYAN, RESET
 
 from src import __version__
 
@@ -52,8 +53,19 @@ class _HelpAction(argparse.Action):
 
 class Parser(argparse.ArgumentParser):
     def __init__(self):
+        try:
+            terminal_width = os.get_terminal_size()[0]
+            if terminal_width >= 120:
+                banner = HELP_BANNER_WIDE
+            elif terminal_width >= 45:
+                banner = HELP_BANNER_NARROW
+            else:
+                banner = ''
+        except OSError:
+            banner = HELP_BANNER_NARROW
+
         super().__init__(prog='proxy-vs-direct',
-                         description=f'{CYAN}{HELP_BANNER}{RESET}Proxy vs Direct {__version__} - Make your proxy and direct connection PK on latency to a certain URL.',
+                         description=f'{CYAN}{banner}{RESET}Proxy vs Direct {__version__} - Make your proxy and direct connection PK on latency to a certain URL.',
                          epilog='Examples: \n  python -m src https://example.com -r 10\n  python -m src https://example.com --rules',
                          formatter_class=argparse.RawDescriptionHelpFormatter,
                          add_help=False

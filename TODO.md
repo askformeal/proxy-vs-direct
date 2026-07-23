@@ -15,7 +15,7 @@
 - [X] Use timer to replace "Waiting..." during PK
 - [X] Add output to JSON feature
 - [X] Add `--encoding option
-- [ ] Add auto use wide or narrow banner depends on terminal width feature
+- [X] Add auto use wide or narrow banner depends on terminal width feature
 - [ ] Add config file
 - [ ] Add customizable connect and read timeout
 - [ ] Add progress bar

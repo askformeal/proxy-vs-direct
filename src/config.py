@@ -30,7 +30,8 @@ INFO = f'{DIM}INFO: {RESET}'
 
 AFTER_PK_PAUSE = 1
 
-HELP_BANNER =  pyfiglet.figlet_format('P vs D', font='ansi_shadow', width=200)
+HELP_BANNER_NARROW =  pyfiglet.figlet_format('P vs D', font='ansi_shadow', width=200)
+HELP_BANNER_WIDE =  pyfiglet.figlet_format('Proxy vs Direct', font='ansi_shadow', width=200)
 
 PK_REFRESH_INTERVAL = 0.05 # seconds between status refresh during PK
 RULES = '''\
