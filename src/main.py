@@ -8,13 +8,15 @@ from datetime import datetime
 import sys
 
 from src.config import DEFAULT_UA, PK_REFRESH_INTERVAL, AFTER_PK_PAUSE, BOLD, DIM, CYAN, RESET, ERROR, WARNING, INFO
-from src.cli import get_args
+from src.cli import Parser
 from src.output import output
 from src.plot import Plot
 
 class DirectVsProxy:
     def __init__(self):
-        self.args, help_msg = get_args()
+        parser = Parser()
+        self.args = parser.get_args()
+        help_msg = parser.get_help_msg()
 
         output.quiet = self.args.quiet
         output.path = self.args.output_file
