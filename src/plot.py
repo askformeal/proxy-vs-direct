@@ -1,10 +1,10 @@
 from src.output import output
-from src.config import BOLD, DIM, RED, GREEN, YELLOW, CYAN, RESET
+from src.constants import BOLD, DIM, RED, GREEN, YELLOW, CYAN, RESET
 import time
 
 class Plot:
-    def __init__(self, decimals):
-        self.decimals = decimals
+    def __init__(self):
+        self.decimals = 0
 
     def _show_pk_result(self, results: dict):
         proxy_average = results['proxy_average']

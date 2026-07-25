@@ -24,3 +24,6 @@ wheels/
 env/
 venv/
 ENV/
+tmp
+test_*.txt
+test_*.json

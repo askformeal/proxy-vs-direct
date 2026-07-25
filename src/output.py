@@ -3,8 +3,9 @@ import io
 import sys
 import re
 
-from src.config import ERROR, WARNING, INFO
-from src.config import FORCE_OUTPUT_ERROR, FORCE_OUTPUT_WARNING, FORCE_OUTPUT_INFO
+from src.constants import ERROR, WARNING, INFO
+from src.constants import FORCE_OUTPUT_ERROR, FORCE_OUTPUT_WARNING, FORCE_OUTPUT_INFO
+from src.constants import DISABLED
 
 
 _ANSI_RE = re.compile(r'\x1b\[[0-9;]*m')
@@ -14,14 +15,31 @@ def strip_ansi(text):
 
 class Output:
     def __init__(self):
-        self.quiet = False
-        self.path = 'disabled'
-        self.force_write = False
-        self.write_mode = 'create'
+        self.quiet = None
+        self.path = None
+        self.write_mode = None
+        self.encoding = None
+        self.color = None
+
         self.file_ready = False
-        self.color = True
-        self.encoding = 'utf-8'
-        
+        self.ready = False
+        self.stash = []
+
+    def set_attr(self, **kwargs):
+        for name, val in kwargs.items():
+            if val is not None:
+                setattr(self, name, val)
+
+        if None not in (self.quiet, self.path, self.write_mode, self.encoding, self.color):
+            self.flush()
+
+    def flush(self):
+        if not self.ready:
+            self.ready = True
+            for args, kwargs in self.stash:
+                self.__call__(*args, **kwargs)
+            self.stash = []
+    
     def _handle_file_errors(self, e):
         if not self.quiet:
             self.warning(f'Failed to write into {self.path} because ', end='', skip_file=True)
@@ -32,7 +50,7 @@ class Output:
             else:
                 self.__call__(f'"{e}"', end='', skip_file=True, output_type='warning')
             self.__call__('and outputs to file will be disabled.', skip_file=True, output_type='warning')
-        self.path = 'disabled'
+        self.path = DISABLED
 
     def _write_file(self, content, mode):
         try:
@@ -51,7 +69,7 @@ class Output:
                     self.__call__(f'{WARNING} Output mode is set to "create" but {self.path} already exists, and outputs to file will be disabled. '
                                 f'You can use --output-mode overwrite or --force option to overwrite this file or use "append" output mode to append to the end of this file.',
                                 skip_file=True)
-                    self.path = 'disabled'
+                    self.path = DISABLED
                 else:
                     self._write_file(content, 'w')
             
@@ -65,26 +83,30 @@ class Output:
 
 
     def __call__(self, *args, force=False, skip_file=False, prefix='', output_type='normal', **kwargs): #types: normal, error, warning, info
-        type_force_output_filter = {
-            'normal': False,
-            'error': FORCE_OUTPUT_ERROR,
-            'warning': FORCE_OUTPUT_WARNING,
-            'info': FORCE_OUTPUT_INFO
-        }
+        if self.ready:
+            type_force_output_filter = {
+                'normal': False,
+                'error': FORCE_OUTPUT_ERROR,
+                'warning': FORCE_OUTPUT_WARNING,
+                'info': FORCE_OUTPUT_INFO
+            }
 
-        buffer = io.StringIO()
-        print(*args, file=buffer, **kwargs)
-        text = buffer.getvalue()
-        text = f'{prefix}{text}'
+            buffer = io.StringIO()
+            print(*args, file=buffer, **kwargs)
+            text = buffer.getvalue()
+            text = f'{prefix}{text}'
 
-        if self.path != 'disabled' and not skip_file:
-            self._handle_file_write(text)
+            if self.path != DISABLED and not skip_file:
+                self._handle_file_write(text)
 
-        if not self.color:
-            text = strip_ansi(text)
+            if not self.color:
+                text = strip_ansi(text)
 
-        if not self.quiet or force or type_force_output_filter[output_type]:
-            sys.stdout.write(text)
+            if not self.quiet or force or type_force_output_filter[output_type]:
+                sys.stdout.write(text)
+        else:
+            buffered_args = (args, {'force': force, 'skip_file': skip_file, 'prefix': prefix, 'output_type': output_type, **kwargs})
+            self.stash.append(buffered_args)
 
     def error(self, *args, **kwargs):
         self.__call__(*args, prefix=ERROR, output_type='error', **kwargs)

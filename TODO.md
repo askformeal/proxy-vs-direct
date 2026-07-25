@@ -17,6 +17,7 @@
 - [X] Add `--encoding option
 - [X] Add auto use wide or narrow banner depends on terminal width feature
 - [ ] Add config file
+- [ ] Add `config` sub-command (list, default, set, del)
 - [ ] Add customizable connect and read timeout
 - [ ] Add progress bar
 - [ ] Add min/max latency statistics
@@ -26,6 +27,7 @@
 - [ ] Add jitter plot
 - [ ] Add send requests infinitely until interrupted feature
 - [ ] Add retry on failure
+- [ ] Use `pycurl` to `replace` requests to test latency
 - [ ] Add DNS latency test
 - [ ] Add multi-language support
 - [ ] Add multiple and customizable connection contest (Clash of Connections).

@@ -8,135 +8,134 @@ import time
 from datetime import datetime
 import sys
 import json
+from typing import Literal
 
 import requests
 from plyer import notification
 
-from src.config import DEFAULT_ANIMATION, DEFAULT_COLOR, DEFAULT_ENCODING, DEFAULT_OUTPUT_MODE, DEFAULT_UA
-from src.config import PK_REFRESH_INTERVAL, AFTER_PK_PAUSE
-from src.config import BOLD, DIM, CYAN, RESET
+from src.constants import DEFAULTS
+from src.constants import PK_REFRESH_INTERVAL, AFTER_PK_PAUSE, RULES, UNDEFINED, DISABLED
+from src.constants import OPTIONS, OPTIONS_LITERAL
+from src.constants import BOLD, DIM, CYAN, RESET
 from src.cli import Parser
+from src.config import ConfigLoader
 from src.output import output
 from src.plot import Plot
 
 class DirectVsProxy:
     def __init__(self):
-        parser = Parser()
-        self.args = parser.get_args()
-        help_msg = parser.get_help_msg()
+        self.option_source = {}
+        self.effective_proxies = {}
+        self.plot = Plot()
+        self.parser = Parser()
+        args = self.parser.parse_args()
+        self.config_loader = ConfigLoader()
 
+        sys_proxies = urllib.request.getproxies()
+        sys_http_proxy = sys_proxies.get('http', None)
+        sys_https_proxy = sys_proxies.get('https', None) 
 
-        output.quiet = self.args.quiet
-        output.path = self.args.output_file
-        if self.args.encoding == 'default':
-            output.encoding = DEFAULT_ENCODING
-        else:
-            output.encoding = self.args.encoding
+        # Layer 1: Hardcoded default values
+        for name in OPTIONS:
+            self._assign(name, DEFAULTS[name], 'default')
 
-        if self.args.output_mode == 'default':
-            if self.args.force:
-                output.write_mode = 'overwrite'
-            else:
-                output.write_mode = DEFAULT_OUTPUT_MODE
-        else:
-            output.write_mode = self.args.output_mode
+        # Layer 2: Automatic environment detection
+        is_tty = sys.stdout.isatty()
+        if is_tty:
+            self._assign('animation', True, 'auto')
+            self._assign('color', True, 'auto')
 
-        if self.args.force:
-            self.args.overwrite_json = True
+        if sys_http_proxy is not None:
+            self._assign('http_proxy', sys_http_proxy, 'auto')
+        if sys_https_proxy is not None:
+            self._assign('https_proxy', sys_https_proxy, 'auto')
 
-        
-        is_atty = sys.stdout.isatty()
-        if self.args.animation == 'default':
-            if not is_atty:
-                output.info('Non-TTY terminal environment detected. Animations will be disabled. You can use "--animation on" to turn them on if this is a mis-detection')
-                self.args.animation = 'off'
-            else:
-                self.args.animation = DEFAULT_ANIMATION
-        
-        if self.args.color == 'default':
-            if not is_atty:
-                output.info('Non-TTY terminal environment detected. Colors will be disabled. You can use "--color on" to turn them on if this is a mis-detection')
-                output.color = False
-            else:
-                output.color = DEFAULT_COLOR
-        else:
-            output.color = {'on': True, 'off': False}[self.args.color]
+        # Layer 3: Configure file
+        config = self.config_loader.get_config()
 
-        if self.args.help:
-            output(help_msg)
-            sys.exit()
+        for name, val in config.items():
+            self._assign(name, val, 'config')
 
-        self.headers = {}
-        if self.args.user_agent == 'default':
-            self.headers['User-Agent'] = DEFAULT_UA
-        else:
-            self.headers['User-Agent'] = self.args.user_agent
-        
-        self.effective_proxies = urllib.request.getproxies()
-        if self.args.http_proxy != 'default':
-            self.effective_proxies['http'] = self.args.http_proxy
-        if self.args.https_proxy != 'default':
-            self.effective_proxies['https'] = self.args.https_proxy
+        # Layer 4: CLI inputs
 
-        # fallback to direct if no system proxy found
-        if 'http' not in self.effective_proxies:
-            output.warning('No system HTTP proxy found, and will use direct connection instead. You may want to define one manually using --http-proxy.')
-            self.effective_proxies['http'] = None
-        
-        # fallback to direct if no system proxy found
-        if 'https' not in self.effective_proxies:
-            output.warning('No system HTTPS proxy found, and will use direct connection instead. You may want to define one manually using --https-proxy.')
-            self.effective_proxies['https'] = None
-        
+        for name, val in vars(args).items():
+            if val is not UNDEFINED:
+                self._assign(name, val, 'cli')
 
-        self.plot = Plot(self.args.decimals)
+        self.url = args.url
+        self.show_help = args.help
+        self.show_rules = args.rules
+
+        output.flush()
+
+        if not is_tty:
+            if self.option_source['color'] == 'default':
+                output.info('Non-TTY terminal environment detected. Colors will be disabled. You can use "--color" to turn them on if this is a mis-detection')
+            if self.option_source['animation'] == 'default':
+                output.info('Non-TTY terminal environment detected. Animations will be disabled. You can use "--animation" to turn them on if this is a mis-detection')
 
         self.round_status = {'proxy': None, 'direct': None}
 
     def run(self):
         """Run proxy and direct tests, then compare results."""
-        title = f'PROXY vs DIRECT: {self.args.round} request(s) each, {self.args.timeout}s timeout'
-        width = max(len(title) + 4, 50)
-        output(f'{DIM}{"─" * width}{RESET}')
-        output(f'{BOLD}{CYAN}  {title}{RESET}')
-        output(f'{DIM}{"─" * width}{RESET}')
-        output()
 
-        results = self.pk()
+        if self.show_help:
+            # Show help message
+            help_msg = self.parser.get_help_msg()
+            output(help_msg)
 
-        if self.args.animation == 'on':
-            time.sleep(AFTER_PK_PAUSE)
-        output()
-        self.plot._show_pk_result(results)
+        elif self.show_rules:
+            # Show rules
+            output(RULES)
 
-        if self.args.json != 'undefined':
-            if os.path.exists(self.args.json) and not self.args.overwrite_json:
-                output.warning(f'Failed to write into {self.args.json} because it already exists. You can use --overwrite-json option or --force option to overwrite this file.')
-            else:
+        else:
+            # Connection PK
+            if self.option_source['http_proxy'] == 'default':
+                output.warning('No system HTTP proxy found, and will use direct connection as default. You may want to define one manually using --http-proxy.')
+            if self.option_source['https_proxy'] == 'default':
+                output.warning('No system HTTPS proxy found, and will use direct connection as default. You may want to define one manually using --https-proxy.')
+            title = f'PROXY vs DIRECT: {self.round} request(s) each, {self.timeout}s timeout'
+            width = max(len(title) + 4, 50)
+            output(f'{DIM}{"─" * width}{RESET}')
+            output(f'{BOLD}{CYAN}  {title}{RESET}')
+            output(f'{DIM}{"─" * width}{RESET}')
+            output()
+
+            results = self.pk()
+
+            if self.animation:
+                time.sleep(AFTER_PK_PAUSE)
+            output()
+            self.plot._show_pk_result(results)
+
+            if self.json != DISABLED:
+                if os.path.exists(self.json) and not self.overwrite_json:
+                    output.warning(f'Failed to write into {self.json} because it already exists. You can use --overwrite-json option or --force option to overwrite this file.')
+                else:
+                    try:
+                        with open(self.json, 'w', encoding=self.encoding) as f:
+                            json.dump(results, f)
+                    except OSError as e:
+                        output.warning(f'Failed to write into {self.json} because ', end='')
+                        if isinstance(e, PermissionError):
+                            output('permission is insufficient.', output_type='warning')
+                        elif isinstance(e, IsADirectoryError):
+                            output('target path is a directory instead of a file.', output_type='warning')
+                        else:
+                            output(f'\"{e}\".', output_type='warning')
+
+            if self.notify:
                 try:
-                    with open(self.args.json, 'w', encoding=self.args.encoding) as f:
-                        json.dump(results, f)
-                except OSError as e:
-                    output.warning(f'Failed to write into {self.args.json} because ', end='')
-                    if isinstance(e, PermissionError):
-                        output('permission is insufficient.', output_type='warning')
-                    elif isinstance(e, IsADirectoryError):
-                        output('target path is a directory instead of a file.', output_type='warning')
-                    else:
-                        output(f'\"{e}\".', output_type='warning')
-
-        if self.args.notify:
-            try:
-                notification.notify(title='Proxy vs Direct', message='PK completed')
-            except Exception as e:
-                output.warning(f'Failed to send system notification: {type(e).__name__}')
+                    notification.notify(title='Proxy vs Direct', message='PK completed')
+                except Exception as e:
+                    output.warning(f'Failed to send system notification: {type(e).__name__}')
 
     def pk(self):
         results = {
-            'url': self.args.url,
+            'url': self.url,
             'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'timeout': self.args.timeout,
-            'decimals': self.args.decimals,
+            'timeout': self.timeout,
+            'decimals': self.decimals,
             'http_proxy': self.effective_proxies['http'],
             'https_proxy': self.effective_proxies['https'],
             'rounds': [],
@@ -144,7 +143,7 @@ class DirectVsProxy:
             'direct_score': 0,
             'tie_count': 0,
             'completed': 0,
-            'total': self.args.round,
+            'total': self.round,
             "proxy_failed": 0,
             "direct_failed": 0,
             "proxy_average": 0,
@@ -176,7 +175,7 @@ class DirectVsProxy:
             for i in range(results['total']):
                 self.round_status = {'proxy': None, 'direct': None}
                 output(f"Round [{i+1}/{results['total']}]", end='')
-                if self.args.animation == 'on':
+                if self.animation:
                     output(':')
                 else:
                     output(' waiting...')
@@ -185,7 +184,7 @@ class DirectVsProxy:
                 Thread(target=self._start_test, args=('direct', None), daemon=True).start()
                 round_start_time = time.time()
                 while True:
-                    if self.args.animation == 'on':
+                    if self.animation:
                         self.plot._print_round_info(self.round_status, start_time=round_start_time)
                         time.sleep(PK_REFRESH_INTERVAL)
                         output('\033[F\033[K', end='', skip_file=True) # Delete last line
@@ -220,21 +219,21 @@ class DirectVsProxy:
         direct_latencies = list(filter(lambda x: x != -1, direct_latencies))
 
         try:
-            results['proxy_average'] = round(mean(proxy_latencies), self.args.decimals)
+            results['proxy_average'] = round(mean(proxy_latencies), self.decimals)
         except StatisticsError:
             results['proxy_average'] = -1
         try:
-            results['direct_average'] = round(mean(direct_latencies), self.args.decimals)
+            results['direct_average'] = round(mean(direct_latencies), self.decimals)
         except StatisticsError:
             results['direct_average'] = -1
 
         end_time = time.time()
-        results['duration'] = round(end_time-start_time, self.args.decimals)
+        results['duration'] = round(end_time-start_time, self.decimals)
 
         return results
 
     def _start_test(self, name, proxies):
-        result = self.test_url(self.args.url, proxies, self.args.timeout, self.headers, self.args.decimals)
+        result = self.test_url(self.url, proxies, self.timeout, self.headers, self.decimals)
         self.round_status[name] = result
 
     @staticmethod
@@ -271,3 +270,38 @@ class DirectVsProxy:
             result['msg'] = f'Code {code}'
         
         return result
+    
+    def _assign(self, name: OPTIONS_LITERAL, val, source: Literal['default', 'auto', 'config', 'cli']):
+        if name == 'round':
+            self.round = val
+        elif name == 'decimals':
+            self.decimals = val
+            self.plot.decimals = val
+        elif name == 'notify':
+            self.notify = val
+        elif name == 'encoding':
+            self.encoding = val
+            output.encoding = val
+        elif name == 'user_agent':
+            self.headers = {'User-Agent': val}
+        elif name == 'http_proxy':
+            self.effective_proxies['http'] = val
+        elif name == 'https_proxy':
+            self.effective_proxies['https'] = val
+        elif name == 'timeout':
+            self.timeout = val
+        elif name =='quiet':
+            output.set_attr(quiet=val)
+        elif name == 'animation':
+            self.animation = val
+        elif name =='color':
+            output.set_attr(color=val)
+        elif name == 'output_file':
+            output.set_attr(path=val)
+        elif name == 'output_mode':
+            output.write_mode = val
+        elif name == 'json':
+            self.json = val
+        elif name == 'overwrite_json':
+            self.overwrite_json = val
+        self.option_source[name] = source
