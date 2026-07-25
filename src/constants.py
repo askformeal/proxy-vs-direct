@@ -88,3 +88,25 @@ OPTIONS_LITERAL = Literal[
 OPTIONS = []
 for name in get_args(OPTIONS_LITERAL):
     OPTIONS.append(str(name))
+
+'''
+Where is an option deployed:
+
+name: remove all prefix hyphens from argument name and use underscore to replace between-word ones
+
+name in constants.py -> OPTIONS_LITERAL
+default value in constants.py -> DEFAULTS
+
+wire to attributes in main.py -> DirectVsProxy -> _assign
+
+validate function in validate.py if needed
+
+name, type and group in configure file in config.py -> ConfigLoader -> get_config
+
+auto environment detection in main.py -> DirectVsProxy -> __init__ and corresponding warning/info output if needed
+
+CLI argument in cli.py -> Parser -> __init__
+type function in cli.py if needed
+
+references in README.md
+'''
