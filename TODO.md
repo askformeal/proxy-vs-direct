@@ -16,7 +16,7 @@
 - [X] Add output to JSON feature
 - [X] Add `--encoding option
 - [X] Add auto use wide or narrow banner depends on terminal width feature
-- [ ] Add config file
+- [X] Add config file
 - [ ] Add `config` sub-command (list, default, set, del)
 - [ ] Add customizable connect and read timeout
 - [ ] Add progress bar

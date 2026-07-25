@@ -39,19 +39,31 @@ class Plot:
         
         diff = proxy_score - direct_score
         proxy_color = colors[(diff>0) - (diff<0)] # True==1, False==0
+
+        if proxy_average == -1:
+            proxy_average = 'All rounds failed, average latency unavailable'
+        else:
+            proxy_average = f'{proxy_average}ms'
+
         output(f'  {proxy_color}{BOLD}Proxy{RESET}')
         output(f'    {DIM}Score:{RESET}   {proxy_color}{proxy_score}{RESET}')
         output(f'    {DIM}Failed:{RESET}  [{results["proxy_failed"]}/{results["completed"]}]')
-        output(f'    {DIM}Average:{RESET} {proxy_average}ms')
+        output(f'    {DIM}Average:{RESET} {proxy_average}')
         output()
 
         # Direct stats
         diff = direct_score - proxy_score
         direct_color = colors[(diff>0) - (diff<0)] # True==1, False==0
+
+        if direct_average == -1:
+            direct_average = 'All rounds failed, average latency unavailable'
+        else:
+            direct_average = f'{direct_average}ms'
+
         output(f'  {direct_color}{BOLD}Direct{RESET}')
         output(f'    {DIM}Score:{RESET}   {direct_color}{direct_score}{RESET}')
         output(f'    {DIM}Failed:{RESET}  [{results["direct_failed"]}/{results["completed"]}]')
-        output(f'    {DIM}Average:{RESET} {direct_average}ms')
+        output(f'    {DIM}Average:{RESET} {direct_average}')
         output()
 
         # Overall
