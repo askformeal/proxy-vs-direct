@@ -6,7 +6,15 @@ class Plot:
     def __init__(self):
         self.decimals = 0
 
-    def _show_pk_result(self, results: dict):
+    def show_pk_start(self, round, timeout):
+        title = f'PROXY vs DIRECT: {round} request(s) each, {timeout}s timeout'
+        width = max(len(title) + 4, 50)
+        output(f'{DIM}{"─" * width}{RESET}')
+        output(f'{BOLD}{CYAN}  {title}{RESET}')
+        output(f'{DIM}{"─" * width}{RESET}')
+        output()
+
+    def show_pk_result(self, results: dict):
         proxy_average = results['proxy_average']
         direct_average = results['direct_average']
         proxy_score = results['proxy_score']
@@ -57,7 +65,7 @@ class Plot:
         output(f' with {results["tie_count"]} round(s) ended in ties.')
         output(f'{DIM}{"─" * width}{RESET}')
 
-    def _plot_round_result(self, round_status) -> dict:
+    def plot_round_result(self, round_status) -> dict:
         proxy_latency = round_status['proxy']['latency']
         direct_latency = round_status['direct']['latency']
         round_result = {
@@ -95,7 +103,7 @@ class Plot:
 
         return round_result
 
-    def _print_round_info(self, round_status, skip_file=True, start_time=0):
+    def print_round_info(self, round_status, skip_file=True, start_time=0):
         proxy_info = self._gen_round_info('Proxy', round_status['proxy'], start_time)
         direct_info = self._gen_round_info('Direct', round_status['direct'], start_time)
         output(f'  {proxy_info} | {direct_info}', skip_file=skip_file)
