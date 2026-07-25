@@ -281,7 +281,7 @@ class DirectVsProxy:
             self.notify = val
         elif name == 'encoding':
             self.encoding = val
-            output.encoding = val
+            output.set_attr(encoding=val)
         elif name == 'user_agent':
             self.headers = {'User-Agent': val}
         elif name == 'http_proxy':
@@ -299,7 +299,7 @@ class DirectVsProxy:
         elif name == 'output_file':
             output.set_attr(path=val)
         elif name == 'output_mode':
-            output.write_mode = val
+            output.set_attr(write_mode=val)
         elif name == 'json':
             self.json = val
         elif name == 'overwrite_json':

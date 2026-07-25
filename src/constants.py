@@ -90,7 +90,7 @@ for name in get_args(OPTIONS_LITERAL):
     OPTIONS.append(str(name))
 
 '''
-Where is an option deployed:
+Where are an option deployed:
 
 name: remove all prefix hyphens from argument name and use underscore to replace between-word ones
 

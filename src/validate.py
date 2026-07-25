@@ -48,5 +48,3 @@ def valid_output_mode(val):
         return val
     else:
         return None
-
-url_scheme_undefined = False

@@ -1,7 +1,6 @@
 import platformdirs
 import tomllib
 import os
-from typing import Literal
 
 from src.constants import PLATFORM_DIR_NAME, CONFIG_FILE_NAME, OPTIONS_LITERAL
 from src.validate import positive_float, positive_int, valid_bool, valid_output_mode, valid_str
@@ -51,7 +50,7 @@ class ConfigLoader:
                 else:
                     output(f'{type(e).__name__}', output_type='warning')
                 return {}
-            else:                
+            else:
                 self._assign_option('round', 'positive integer')
                 self._assign_option('decimals', 'positive integer')
                 self._assign_option('notify', 'boolean')
