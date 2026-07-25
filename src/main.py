@@ -71,8 +71,6 @@ class DirectVsProxy:
             if self.option_source['animation'] == 'default':
                 output.info('Non-TTY terminal environment detected. Animations will be disabled. You can use "--animation" to turn them on if this is a mis-detection')
 
-        self.round_status = {'proxy': None, 'direct': None}
-
     def run(self):
         """Run proxy and direct tests, then compare results."""
 

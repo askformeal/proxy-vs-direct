@@ -18,6 +18,8 @@ class Contest:
         self.animation = False
         self.plot = None
 
+        self.round_status = {'proxy': None, 'direct': None}
+
     def pk(self):
         results = {
             'url': self.url,
