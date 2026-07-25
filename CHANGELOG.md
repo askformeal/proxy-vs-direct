@@ -2,6 +2,8 @@
 
 All notable changes to proxy-vs-direct will be documented here.
 
+## [Unreleased]
+
 ## [0.5.1] - 2026-07-25
 
 ### Changed
@@ -31,7 +33,6 @@ All notable changes to proxy-vs-direct will be documented here.
 - `output.encoding` and `output.write_mode` now go through `set_attr()` for proper flush coordination
 - `_positive_int`/`_positive_float` error messages preserve the original input value
 - `ConfigLoader.get_config()` returns `{}` on read/parse errors with a warning instead of crashing
-- License: switched from MIT to Apache-2.0
 
 ### Removed
 - `-f / --force` flag (use `--output-mode overwrite` + `--overwrite-json` instead)
