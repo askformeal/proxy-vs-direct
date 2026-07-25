@@ -5,7 +5,7 @@ Compare the latency to a certain URL between proxy and direct connection.
 ## Usage
 
 ```bash
-python -m src <url> [-r ROUND] [-t TIMEOUT] [-d DECIMALS] [--rules] [--user-agent USER_AGENT] [--http-proxy HTTP_PROXY] [--https-proxy HTTPS_PROXY] [-n] [--quiet] [--output-file PATH] [--output-mode MODE] [-f] [-j JSON_PATH] [--overwrite-json] [--animation {on,off}] [--color {on,off}]
+python -m src <url> [-r ROUND] [-t TIMEOUT] [-d DECIMALS] [--rules] [--user-agent USER_AGENT] [--http-proxy HTTP_PROXY] [--https-proxy HTTPS_PROXY] [-n] [--quiet | --no-quiet] [--animation | --no-animation] [--color | --no-color] [--output-file PATH] [--output-mode MODE] [-j JSON_PATH] [--overwrite-json] [--encoding ENCODING]
 ```
 
 ### Arguments
@@ -18,18 +18,18 @@ python -m src <url> [-r ROUND] [-t TIMEOUT] [-d DECIMALS] [--rules] [--user-agen
 - `--user-agent` — Custom User-Agent header (default: Chrome 137)
 - `--http-proxy` — HTTP proxy to use (default: system proxy)
 - `--https-proxy` — HTTPS proxy to use (default: system proxy)
-- `--quiet` — Suppress terminal output
+- `-n, --notify, --no-notify` — Send/disable system notification on completion
+- `--quiet, --no-quiet` — Suppress/allow terminal output
+- `--animation, --no-animation` — Toggle real-time round status animation (auto-detected for TTY)
+- `--color, --no-color` — Toggle ANSI colors (auto-detected for TTY)
+- `--encoding ENCODING` — File encoding for output (default: utf-8)
 - `--output-file PATH` — Write output to a file
 - `--output-mode MODE` — File write mode (requires `--output-file`):
   - `create` (default) — Create a new file. Fail if file already exists.
   - `overwrite` — Overwrite existing file or create a new one.
   - `append` — Append to the end of an existing file, or create a new one.
-- `-f, --force` — Force overwrite all files (sets mode to `overwrite` unless `--output-mode` is specified, and overwrites existing JSON file)
 - `-j, --json PATH` — Write PK result to a JSON file
-- `--overwrite-json` — Overwrite existing JSON file (or use `-f`)
-- `-n, --notify` — Send system notification on completion
-- `--animation` — Toggle real-time round status animation: `on` or `off` (auto-detected for TTY)
-- `--color` — Toggle ANSI colors: `on` or `off` (auto-detected for TTY)
+- `--overwrite-json, --no-overwrite-json` — Overwrite/keep existing JSON file
 - `-v, --version` — Show version info
 
 ### Example
@@ -46,65 +46,65 @@ python -m src https://www.google.com -j result.json
 
 ### Help
 ```
-usage: proxy-vs-direct [-r ROUND] [-d DECIMALS] [--rules] [-n] [-h] [-v]
-                       [--user-agent USER_AGENT] [--http-proxy HTTP_PROXY]
-                       [--https-proxy HTTPS_PROXY] [-t TIMEOUT] [--quiet]
-                       [--animation {default,on,off}]
-                       [--color {default,on,off}] [--output-file OUTPUT_FILE]
-                       [--output-mode {default,create,overwrite,append}] [-f]
-                       [-j JSON] [--overwrite-json]
+usage: proxy-vs-direct [-r ROUND] [-d DECIMALS] [--rules]
+                       [-n | --notify | --no-notify] [--encoding ENCODING]
+                       [-h] [-v] [--user-agent USER_AGENT]
+                       [--http-proxy HTTP_PROXY] [--https-proxy HTTPS_PROXY]
+                       [-t TIMEOUT] [--quiet | --no-quiet]
+                       [--animation | --no-animation] [--color | --no-color]
+                       [--output-file OUTPUT_FILE]
+                       [--output-mode {default,create,overwrite,append}]
+                       [-j JSON] [--overwrite-json | --no-overwrite-json]
                        [url]
 
-██████╗ ██████╗  ██████╗ ██╗  ██╗██╗   ██╗    ██╗   ██╗███████╗    ██████╗ ██╗██████╗ ███████╗ ██████╗████████╗
-██╔══██╗██╔══██╗██╔═══██╗╚██╗██╔╝╚██╗ ██╔╝    ██║   ██║██╔════╝    ██╔══██╗██║██╔══██╗██╔════╝██╔════╝╚══██╔══╝
-██████╔╝██████╔╝██║   ██║ ╚███╔╝  ╚████╔╝     ██║   ██║███████╗    ██║  ██║██║██████╔╝█████╗  ██║        ██║
-██╔═══╝ ██╔══██╗██║   ██║ ██╔██╗   ╚██╔╝      ╚██╗ ██╔╝╚════██║    ██║  ██║██║██╔══██╗██╔══╝  ██║        ██║
-██║     ██║  ██║╚██████╔╝██╔╝ ██╗   ██║        ╚████╔╝ ███████║    ██████╔╝██║██║  ██║███████╗╚██████╗   ██║
-╚═╝     ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝   ╚═╝         ╚═══╝  ╚══════╝    ╚═════╝ ╚═╝╚═╝  ╚═╝╚══════╝ ╚═════╝   ╚═╝
+██████╗     ██╗   ██╗███████╗    ██████╗
+██╔══██╗    ██║   ██║██╔════╝    ██╔══██╗
+██████╔╝    ██║   ██║███████╗    ██║  ██║
+██╔═══╝     ╚██╗ ██╔╝╚════██║    ██║  ██║
+██║          ╚████╔╝ ███████║    ██████╔╝
+╚═╝           ╚═══╝  ╚══════╝    ╚═════╝
 
 Proxy vs Direct 0.5.0 - Make your proxy and direct connection PK on latency to a certain URL.
 
 positional arguments:
-  url                   Target URL.
+  [url]                 Target URL.
 
 options:
   -r ROUND, --round ROUND
-                        Number of rounds to PK.
+                        Number of rounds to PK
   -d DECIMALS, --decimals DECIMALS
-                        Decimal precision.
+                        Decimal precision
   --rules               Show PK rules
-  -n, --notify          Send system notify on completion
+  -n, --notify, --no-notify
+                        Send system notify on completion
   --encoding ENCODING   File encoding for output (default: utf-8)
   -h, --help            Show this help message and exit
   -v, --version         Show version info
 
 Request:
   --user-agent USER_AGENT
-                        User-Agent to use in request headers.
+                        User-Agent to use in request headers
   --http-proxy HTTP_PROXY
-                        HTTP proxy to use. Use system proxy by default.
+                        HTTP proxy to use. Use system proxy by default
   --https-proxy HTTPS_PROXY
-                        HTTPS proxy to use. Use system proxy by default.
+                        HTTPS proxy to use. Use system proxy by default
   -t TIMEOUT, --timeout TIMEOUT
-                        Timeout in seconds.
+                        Timeout in seconds
 
 Output to Terminal:
-  --quiet               Disable terminal outputs.
-  --animation {default,on,off}
+  --quiet, --no-quiet   Disable terminal outputs
+  --animation, --no-animation
                         Toggle animations for better compatibility: [on/off]
-  --color {default,on,off}
-                        Toggle colors for better compatibility: [on/off]
+  --color, --no-color   Toggle colors for better compatibility: [on/off]
 
 Output to File:
   --output-file OUTPUT_FILE
-                        A path of a file to write outputs into.
+                        A path of a file to write outputs into
   --output-mode {default,create,overwrite,append}
                         Output to file modes: [create/overwrite/append]
-  -f, --force           Force overwrite all files. Will set output mode to
-                        "overwrite" unless manually specified with --output-
-                        mode option and overwrite existing json file.
-  -j JSON, --json JSON  A path of a json file to write PK result into.
-  --overwrite-json      Overwrite existing json file.
+  -j JSON, --json JSON  A path of a json file to write PK result into
+  --overwrite-json, --no-overwrite-json
+                        Overwrite existing json file
 
 Examples:
   python -m src https://example.com -r 10
@@ -170,6 +170,12 @@ python -m venv .venv
 source .venv/Scripts/activate  # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 ```
+
+## Config File
+
+proxy-vs-direct supports a TOML config file at your platform's config directory (e.g. `~/.config/proxy-vs-direct/config.toml` on Linux, `%LOCALAPPDATA%/proxy-vs-direct/proxy-vs-direct/config.toml` on Windows).
+
+Configuration priority (highest to lowest): CLI arguments > config file > auto-detection > hardcoded defaults.
 
 ## TODO
 
