@@ -2,6 +2,13 @@
 
 Compare the latency to a certain URL between proxy and direct connection.
 
+> **⚠️ v0.5.0 Breaking Changes**
+> - `--animation` and `--color` changed from `{default,on,off}` choices to `[--animation | --no-animation]` / `[--color | --no-color]` boolean flags
+> - `--quiet` changed to `[--quiet | --no-quiet]` toggle
+> - `--overwrite-json` changed to `[--overwrite-json | --no-overwrite-json]` toggle
+> - `-f / --force` removed (use `--output-mode overwrite` + `--overwrite-json` instead)
+> - New TOML config file support added
+
 ## Usage
 
 ```bash
