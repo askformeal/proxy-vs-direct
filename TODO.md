@@ -17,10 +17,16 @@
 - [X] Add `--encoding option
 - [X] Add auto use wide or narrow banner depends on terminal width feature
 - [X] Add config file
-- [X] Add `config` sub-command (list, show, where)
+- [X] Add `config` sub-command (list, show, where, open, set, unset, clean, create, purge)
   - [X] `list` — display config file contents with section grouping
   - [X] `show` — display the value of a given option
   - [X] `where` — display the path of the configure file
+  - [X] `open` — open config file with default system application
+  - [X] `set` — set the value of a given option
+  - [X] `unset` — delete a given option from configure file
+  - [X] `clean` — remove all invalid and undefined options
+  - [X] `create` — create an empty configure file if none exists
+  - [X] `purge` — delete the configure file
 - [ ] Add `--show-source` option
 - [ ] Add `--config` option to specify configure file (set to "none" to skip loading configure file)
 - [ ] Add customizable connect and read timeout

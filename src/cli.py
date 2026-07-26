@@ -141,6 +141,19 @@ class Parser(argparse.ArgumentParser):
             set_parser.add_argument('value', type=str, metavar='[value]', help='value of the option to set')
             set_parser.add_argument('-h', '--help', action=_HelpActionConfigCommand, nargs=0, help='Show the help message of config set subcommand and exit')
 
+            unset_parser = self._get_command_parser(config_sub, 'unset', 'Delete a given option in configure file')
+            unset_parser.add_argument('name', type=_valid_option, metavar='[name]', help='name of the option to set')
+            unset_parser.add_argument('-h', '--help', action=_HelpActionConfigCommand, nargs=0, help='Show the help message of config unset subcommand and exit')
+
+            clean_parser = self._get_command_parser(config_sub, 'clean', 'Clean configure file by deleting all invalid or undefined options')
+            clean_parser.add_argument('-h', '--help', action=_HelpActionConfigCommand, nargs=0, help='Show the help message of config clean subcommand and exit')
+
+            create_parser = self._get_command_parser(config_sub, 'create', 'Create an empty configure file if none exists')
+            create_parser.add_argument('-h', '--help', action=_HelpActionConfigCommand, nargs=0, help='Show the help message of config create subcommand and exit')
+
+            purge_parser = self._get_command_parser(config_sub, 'purge', 'Delete configure file')
+            purge_parser.add_argument('-h', '--help', action=_HelpActionConfigCommand, nargs=0, help='Show the help message of config purge subcommand and exit')
+
             self.help_msg = default_parser.format_help()
             self.config_help_msg = config_parser.format_help()
             self.list_help_msg = list_parser.format_help()
@@ -148,6 +161,10 @@ class Parser(argparse.ArgumentParser):
             self.where_help_msg = where_parser.format_help()
             self.open_help_msg = open_parser.format_help()
             self.set_help_msg = set_parser.format_help()
+            self.unset_help_msg = unset_parser.format_help()
+            self.clean_help_msg = clean_parser.format_help()
+            self.create_help_msg = create_parser.format_help()
+            self.purge_help_msg = purge_parser.format_help()
 
 
     def _get_command_parser(self, sub, name, help_msg, description=None):

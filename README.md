@@ -43,7 +43,15 @@ python -m src <url>                                       # 'pk' is assumed when
 
 | Command | Description |
 |---------|-------------|
-| `python -m src config list` | List all options from the config file, grouped by TOML section |
+| `python -m src config list` | List options from config file, grouped by TOML section |
+| `python -m src config show <option>` | Show value of a specific option |
+| `python -m src config set <option> <value>` | Set an option's value in config file |
+| `python -m src config unset <option>` | Delete an option from config file |
+| `python -m src config where` | Show the path of the config file |
+| `python -m src config open` | Open config file with system default app |
+| `python -m src config clean` | Remove invalid and undefined options |
+| `python -m src config create` | Create an empty config file |
+| `python -m src config purge` | Delete the config file |
 
 Invalid values in the config file are reported separately with a description of why they failed validation.
 
@@ -56,6 +64,9 @@ python -m src https://www.google.com --http-proxy http://127.0.0.1:7897 --https-
 python -m src https://www.google.com --quiet --output-file result.txt
 python -m src https://www.google.com -j result.json
 python -m src config list
+python -m src config show round
+python -m src config set round 15
+python -m src config where
 ```
 
 ## Screenshots
@@ -137,14 +148,22 @@ Request:
   -t, --timeout TIMEOUT
                         Timeout in seconds
 ```
+Here's the config help (`python -m src config -h`):
 
-Config subcommand help (`python -m src config -h`):
 ```
-usage: proxy-vs-direct config [-h] {list} ...
+usage: proxy-vs-direct config [-h] {list,show,where,open,set,unset,clean,create,purge} ...
 
 positional arguments:
-  {list}
-    list      List all options in configure file
+  {list,show,where,open,set,unset,clean,create,purge}
+    list          List all options in configure file
+    show          Show the value of a given option
+    where         Show the path of configure file
+    open          Open configure file with the default app
+    set           Set the value of a given option
+    unset         Delete a given option in configure file
+    clean         Clean file by deleting invalid/undefined options
+    create        Create an empty configure file if none exists
+    purge         Delete configure file
 
 options:
   -h, --help  Show help message of config subcommand and exit
@@ -216,7 +235,7 @@ proxy-vs-direct supports a TOML config file at your platform's config directory 
 
 Configuration priority (highest to lowest): CLI arguments > config file > auto-detection > hardcoded defaults.
 
-Use `python -m src config list` to view the current config file contents. Invalid values are reported separately with a description of the failure.
+Use `python -m src config list` to view the current config, `config set <option> <value>` to modify it, and `config where` to find the file. Use `config clean` to remove invalid or undefined entries, `config create` to bootstrap an empty config, and `config purge` to delete it entirely.
 
 A sample config file (`config.example.toml`) is included in the repository.
 

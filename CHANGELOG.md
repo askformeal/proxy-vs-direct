@@ -4,6 +4,39 @@ All notable changes to proxy-vs-direct will be documented here.
 
 ## [Unreleased]
 
+### Added
+- `config set <option> <value>`: set an option's value in config file
+- `config unset <option>`: delete an option from config file
+- `config clean`: remove invalid and undefined options from config file
+- `config create`: create an empty config file
+- `config purge`: delete the config file
+- `config open`: open config file with system default application
+- `config where`: show the path of the config file
+- `Config.corrupted` flag: tracks whether the config file is broken
+- `@require_valid_file` decorator: guards config operations against corrupted files
+- `Config._apply_to_file()`: extracted write logic with error handling, reusable across operations
+- `unset_option()` method with automatic empty-section cleanup
+- Boolean value normalization: CLI strings `true`/`false` are accepted alongside Python `bool`
+- `OPTION_TYPE_NAME` computed mapping from `OPTION_TYPES` and `OPTION_TAG_NAME`
+- ANSI `BLUE` and `MAGENTA` color constants
+- Random banner color on help display
+- Colored help epilog with GitHub and feedback links
+
+### Changed
+- `Config` class now loads options through `_assign_option()` for consistent validation
+- `Config.show_list()` and `Config.show_option()` guarded by `@require_valid_file`
+- `Config.set_option()` refactored to use `_apply_to_file()`
+- `validate.valid_bool()` now accepts `"true"`/`"false"` strings from CLI input
+- `require_valid_file` moved out of `Config` class to module level
+- `_apply_to_file()` accepts optional `content` parameter for custom payloads
+
+### Fixed
+- `Config.unset_option()` KeyError when group section is absent from config (now uses `.get(..., None)`)
+- `config open` help message pointing to `where_help_msg` (copy-paste error)
+- macOS `open_file()` using undefined `path` variable (copy-paste error)
+- Config file warning message missing trailing space
+- Empty sections left behind after deleting all options in a group
+
 ## [0.6.0] - 2026-07-26
 
 ### Added

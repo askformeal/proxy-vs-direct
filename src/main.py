@@ -157,6 +157,30 @@ class DirectVsProxy:
                 else:
                     self.config.set_option(self.name, self.value)
 
+            elif self.config_command == 'unset':
+                if self.show_help:
+                    output.help(self.parser.unset_help_msg)
+                else:
+                    self.config.unset_option(self.name)
+
+            elif self.config_command == 'clean':
+                if self.show_help:
+                    output.help(self.parser.clean_help_msg)
+                else:
+                    self.config.clean_file()
+
+            elif self.config_command == 'create':
+                if self.show_help:
+                    output.help(self.parser.create_help_msg)
+                else:
+                    self.config.create_file()
+
+            elif self.config_command == 'purge':
+                if self.show_help:
+                    output.help(self.parser.purge_help_msg)
+                else:
+                    self.config.purge_file()
+
             elif self.show_help:
                 output.help(self.parser.config_help_msg)
     
