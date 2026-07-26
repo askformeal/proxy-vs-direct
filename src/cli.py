@@ -72,22 +72,23 @@ class Parser(argparse.ArgumentParser):
                             add_help=False
                             )
 
-            self.add_argument('--encoding', default=UNDEFINED, help='File encoding for output (default: utf-8)')
+            # ----- public parser -----
+            public_parser = argparse.ArgumentParser(add_help=False)
+            public_parser.add_argument('--encoding', default=UNDEFINED, help='File encoding for output (default: utf-8)')
 
-            group_terminal = self.add_argument_group('Output to Terminal')
+            group_terminal = public_parser.add_argument_group('Output to Terminal')
             group_terminal.add_argument('--quiet', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Disable terminal outputs')
             group_terminal.add_argument('--animation', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Toggle animations for better compatibility')
             group_terminal.add_argument('--color', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Toggle colors for better compatibility')
 
-            group_file = self.add_argument_group('Output to File')
+            group_file = public_parser.add_argument_group('Output to File')
             group_file.add_argument('--output-file', default=UNDEFINED, help='A path of a file to write outputs into')
             group_file.add_argument('--output-mode', default=UNDEFINED, choices=['default', 'create', 'overwrite', 'append'], help='Output to file modes: [create/overwrite/append]')
 
-            self.add_argument('-h', '--help', action=_HelpActionDefault, nargs=0, help='Show this help message and exit')
-
             command_sub = self.add_subparsers(dest='command', required=False)
 
-            default_parser = command_sub.add_parser('pk', is_sub_parser=True, help='Start Proxy vs Direct PK to a given URL. This subcommand will be used if none is given', add_help=False)
+            # ----- default (pk) parser -----
+            default_parser = command_sub.add_parser('pk', parents=[public_parser], is_sub_parser=True, help='Start Proxy vs Direct PK to a given URL. This subcommand will be used if none is given', add_help=False)
 
             default_parser.add_argument('url', type=_valid_url, metavar='[url]', help='Target URL.')
             default_parser.add_argument('-r', '--round', type=_get_validate_func('round'), default=UNDEFINED, help='Number of rounds to PK')
@@ -105,7 +106,8 @@ class Parser(argparse.ArgumentParser):
             group_request.add_argument('--https-proxy', type=str, default=UNDEFINED, help='HTTPS proxy to use. Use system proxy by default')
             group_request.add_argument('-t', '--timeout', type=_get_validate_func('timeout'), default=UNDEFINED, help='Timeout in seconds')
 
-            config_parser = command_sub.add_parser('config', is_sub_parser=True, help='Edit and examine configures', add_help=False)
+            # ----- config parser -----
+            config_parser = command_sub.add_parser('config', parents=[public_parser], is_sub_parser=True, help='Edit and examine configures', add_help=False)
 
             config_parser.add_argument('-h', '--help', action=_HelpActionConfig, nargs=0, help='Show help message of config subcommand and exit')
 
@@ -118,7 +120,7 @@ class Parser(argparse.ArgumentParser):
             self.list_help_msg = list_parser.format_help()
 
     def get_args(self):
-        if sys.argv[1] not in ('pk', 'config'):
+        if len(sys.argv) > 1 and sys.argv[1] not in ('pk', 'config'):
             args = self.parse_args(['pk'] + sys.argv[1:])
             self.help_msg = self.format_help()
         else:
