@@ -35,8 +35,8 @@ class Config:
                 if valid_val is None:
                     option_type = OPTION_TYPES[name]
                     type_name = OPTION_TAG_NAME[option_type]
-                    output.warning(f'Failed to load option \"{name}\" because its value is not a valid {type_name}.')
-                    self.invalid_options[name] = f'not a valid {type_name}'
+                    output.warning(f'Failed to load option \"{name}\" because its value \"{val}\" is not a valid {type_name}.')
+                    self.invalid_options[name] = f'{val} is not a valid {type_name}'
                 else:
                     self.options[name] = valid_val
 
@@ -94,3 +94,15 @@ class Config:
             output(f'These following options are set in {CONFIG_FILE_NAME} but their values are not valid:')
             options = self._group_options(self.invalid_options)
             self._output_options(options, 1)
+
+    def show_option(self, name):
+        if name in self.options:
+            output(f'{name}: {self.options[name]}')
+        elif name in self.invalid_options:
+            output(f'{name}: {self.invalid_options[name]}')
+
+    def show_path(self):
+        if os.path.exists(self.config_path):
+            output(f'Configure file at {self.config_path}')
+        else:
+            output(f'Would have load configure file from {self.config_path} but it does not exist.')

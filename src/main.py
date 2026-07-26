@@ -68,6 +68,7 @@ class DirectVsProxy:
         self.show_rules = getattr(args, 'rules', UNDEFINED)
         self.contest.url = getattr(args, 'url', UNDEFINED)
         self.name = getattr(args, 'name', None)
+        self.value = getattr(args, 'value', None)
 
         if not is_tty:
             if self.option_source['color'] == 'default':
@@ -131,6 +132,19 @@ class DirectVsProxy:
                     output.help(self.parser.list_help_msg)
                 else:
                     self.config.show_list()
+
+            elif self.config_command == 'show':
+                if self.show_help:
+                    output.help(self.parser.show_help_msg)
+                else:
+                    self.config.show_option(self.name)
+
+            elif self.config_command == 'where':
+                if self.show_help:
+                    output.help(self.parser.where_help_msg)
+                else:
+                    self.config.show_path()
+
             elif self.show_help:
                 output.help(self.parser.config_help_msg)
     

@@ -1,11 +1,17 @@
 import argparse
 import sys
 
-from src.constants import UNDEFINED
-from src.constants import OPTION_TYPES, OPTION_TAG_NAME
+from src.constants import UNDEFINED, DIM, GREEN, BLUE, RESET
+from src.constants import OPTIONS, OPTION_TYPES, OPTION_TAG_NAME
 from src.validate import validate
 
 from src import __version__
+
+def _valid_option(val):
+    if val in OPTIONS:
+        return val
+    else:
+        raise argparse.ArgumentTypeError(f'{val} is not a valid option name')
 
 def _get_validate_func(name):
     return lambda val: _option_validate(name, val)
@@ -47,36 +53,52 @@ class _HelpActionConfig(argparse.Action):
             if action.dest == 'config_command':
                 action.required = False
 
+class _HelpActionConfigCommand(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string = None):
+        setattr(namespace, self.dest, True)
+        for action in parser._actions:
+            if action.dest == 'name':
+                action.required = False
+            elif action.dest == 'value':
+                action.required = False
+
 class Parser(argparse.ArgumentParser):
     def __init__(self, is_sub_parser = False, **kwargs):
         if is_sub_parser:
             super().__init__(**kwargs)
         else:
-            
+            epilog = '\n'.join((f'{GREEN}GitHub Repository:{RESET}',
+                               f'  {BLUE}https://github.com/askformeal/proxy-vs-direct{RESET}',
+                               f'\n{GREEN}If you encounter a problem or want to give a suggestion, please send a feedback by:{RESET}',
+                               f'  Create an issue at {BLUE}https://github.com/askformeal/proxy-vs-direct/issues{RESET}',
+                               f'  Send an E-Mail to {BLUE}muzhi1014@outlook.com{RESET}',
+                               f'\n{GREEN}Examples:{RESET}',
+                               '  python -m src https://example.com -r 10',
+                               '  python -m src https://example.com --rules'))
             super().__init__(prog='proxy-vs-direct',
                             description=f'Proxy vs Direct {__version__} - Make your proxy and direct connection PK on latency to a certain URL.',
-                            epilog='Examples: \n  python -m src https://example.com -r 10\n  python -m src https://example.com --rules',
+                            epilog=epilog,
                             formatter_class=argparse.RawDescriptionHelpFormatter,
                             add_help=False
                             )
 
             # ----- public parser -----
-            public_parser = argparse.ArgumentParser(add_help=False)
-            public_parser.add_argument('--encoding', default=UNDEFINED, help='File encoding for output (default: utf-8)')
+            self.public_parser = argparse.ArgumentParser(add_help=False)
+            self.public_parser.add_argument('--encoding', default=UNDEFINED, help='File encoding for output (default: utf-8)')
 
-            group_terminal = public_parser.add_argument_group('Output to Terminal')
+            group_terminal = self.public_parser.add_argument_group('Output to Terminal')
             group_terminal.add_argument('--quiet', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Disable terminal outputs')
             group_terminal.add_argument('--animation', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Toggle animations for better compatibility')
             group_terminal.add_argument('--color', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Toggle colors for better compatibility')
 
-            group_file = public_parser.add_argument_group('Output to File')
+            group_file = self.public_parser.add_argument_group('Output to File')
             group_file.add_argument('--output-file', default=UNDEFINED, help='A path of a file to write outputs into')
             group_file.add_argument('--output-mode', default=UNDEFINED, choices=['default', 'create', 'overwrite', 'append'], help='Output to file modes: [create/overwrite/append]')
 
             command_sub = self.add_subparsers(dest='command', required=False)
 
             # ----- default (pk) parser -----
-            default_parser = command_sub.add_parser('pk', parents=[public_parser], is_sub_parser=True, help='Start Proxy vs Direct PK to a given URL. This subcommand will be used if none is given', add_help=False)
+            default_parser = self._get_command_parser(command_sub, 'pk','Start Proxy vs Direct PK to a given URL. This subcommand will be used if none is given')
 
             default_parser.add_argument('url', type=_valid_url, metavar='[url]', help='Target URL.')
             default_parser.add_argument('-r', '--round', type=_get_validate_func('round'), default=UNDEFINED, help='Number of rounds to PK')
@@ -95,17 +117,33 @@ class Parser(argparse.ArgumentParser):
             group_request.add_argument('-t', '--timeout', type=_get_validate_func('timeout'), default=UNDEFINED, help='Timeout in seconds')
 
             # ----- config parser -----
-            config_parser = command_sub.add_parser('config', parents=[public_parser], is_sub_parser=True, help='Edit and examine configures', add_help=False)
+            config_parser = self._get_command_parser(command_sub, 'config', 'Edit and examine configure file')
 
-            config_parser.add_argument('-h', '--help', action=_HelpActionConfig, nargs=0, help='Show help message of config subcommand and exit')
+            config_parser.add_argument('-h', '--help', action=_HelpActionConfig, nargs=0, help='Show the help message of config subcommand and exit')
 
             config_sub = config_parser.add_subparsers(dest='config_command', required=True)
-            list_parser = config_sub.add_parser('list', is_sub_parser=True, help='List all options in configure file', add_help=False)
-            list_parser.add_argument('-h', '--help', action='store_true', help='Show help message of config list subcommand and exit')
+
+            list_parser = self._get_command_parser(config_sub, 'list', 'List all options in configure file')
+            list_parser.add_argument('-h', '--help', action=_HelpActionConfigCommand, nargs=0, help='Show the help message of config list subcommand and exit')
+
+            show_parser = self._get_command_parser(config_sub, 'show', 'Show the value of a given option in configure file')
+            show_parser.add_argument('name', type=_valid_option, metavar='[name]', help='name of the option to show')
+            show_parser.add_argument('-h', '--help', action=_HelpActionConfigCommand, nargs=0, help='Show the help message of config show subcommand and exit')
+
+            where_parser = self._get_command_parser(config_sub, 'where', 'Show the path of configure file')
+            where_parser.add_argument('-h', '--help', action=_HelpActionConfigCommand, nargs=0, help='Show the help message of config where subcommand and exit')
 
             self.help_msg = default_parser.format_help()
             self.config_help_msg = config_parser.format_help()
             self.list_help_msg = list_parser.format_help()
+            self.show_help_msg = show_parser.format_help()
+            self.where_help_msg = where_parser.format_help()
+
+
+    def _get_command_parser(self, sub, name, help_msg, description=None):
+        if description is None:
+            description = help_msg
+        return sub.add_parser(name, parents=[self.public_parser], is_sub_parser=True, description=description, help=help_msg, add_help=False)
 
     def get_args(self):
         if len(sys.argv) == 1:

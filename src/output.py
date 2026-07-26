@@ -2,8 +2,10 @@ import os
 import io
 import sys
 import re
+from random import choice
 
-from src.constants import HELP_BANNER_NARROW, HELP_BANNER_WIDE, CYAN, RESET
+from src.constants import HELP_BANNER_NARROW, HELP_BANNER_WIDE 
+from src.constants import DIM, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET
 from src.constants import ERROR, WARNING, INFO
 from src.constants import FORCE_OUTPUT_ERROR, FORCE_OUTPUT_WARNING, FORCE_OUTPUT_INFO
 from src.constants import DISABLED
@@ -93,7 +95,11 @@ class Output:
                 banner = ''
         except OSError:
             banner = HELP_BANNER_NARROW
-        self.__call__(f'\n{CYAN}{banner}{RESET}{message}')
+        banner_color = choice((RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE))
+        message = f'\n{banner_color}{banner}{RESET}{message}'
+        if self.color:
+            message+=f'\n{DIM}P.S. Run this command again, maybe something will different~{RESET}'
+        self.__call__(message)
 
     def __call__(self, *args, force=False, skip_file=False, prefix='', output_type='normal', **kwargs): #types: normal, error, warning, info
         if self.ready:
