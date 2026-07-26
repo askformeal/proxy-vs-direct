@@ -24,8 +24,8 @@ def require_valid_file(action):
 
 class Config:
     def __init__(self):
-        config_dir = platformdirs.user_config_path(PLATFORM_DIR_NAME)
-        self.config_path = os.path.join(config_dir, CONFIG_FILE_NAME)
+        self.config_dir = platformdirs.user_config_path(PLATFORM_DIR_NAME)
+        self.config_path = os.path.join(self.config_dir, CONFIG_FILE_NAME)
         self.options = {}
         self.raw_config = {}
         self.option_source = {}
@@ -137,6 +137,8 @@ class Config:
             output.error(f'Failed to write into {CONFIG_FILE_NAME} because ', end='')
             if isinstance(e, PermissionError):
                 output('permission is insufficient', output_type='error')
+            elif isinstance(e, FileNotFoundError):
+                output(f'{self.config_dir} does not exist. You can use config create subcommand to create one.', output_type='warning')
             else:
                 output(f'\"{e}\"', output_type='error')
             return False
@@ -218,11 +220,26 @@ class Config:
             output.error(f'Failed to delete {name} because it does not exist in the configure file.')
 
     def create_file(self):
+        if not os.path.isdir(self.config_dir):
+            try:
+                os.makedirs(self.config_dir, exist_ok=True)
+            except OSError as e:
+                output.error(f'Failed to create directory {self.config_dir} because ', end='')
+                if isinstance(e, FileExistsError):
+                    output('a file of the same name and path already exists.', output_type='error')
+                elif isinstance(e, PermissionError):
+                    output('permission is insufficient', output_type='error')
+                elif isinstance(e, IsADirectoryError):
+                    output('part of the path is file, not directory.', output_type='error')
+                else:
+                    output(f'\"{e}\".', output_type='error')
+                return
+            
         if os.path.exists(self.config_path):
             output.error(f'Can not create {self.config_path} because it already exists')
         else:
-            self._apply_to_file(content={})
-            output(f'Created empty configure file at {self.config_path}')
+            if self._apply_to_file(content={}):
+                output(f'Created empty configure file at {self.config_path}')
 
     def purge_file(self):
         try:
