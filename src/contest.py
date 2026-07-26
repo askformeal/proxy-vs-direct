@@ -34,6 +34,7 @@ class Contest:
             'tie_count': 0,
             'completed': 0,
             'total': self.round,
+            'interrupted': False,
             "proxy_failed": 0,
             "direct_failed": 0,
             "proxy_average": 0,
@@ -101,6 +102,7 @@ class Contest:
                 direct_latencies.append(self.round_status['direct']['latency'])
         except KeyboardInterrupt:
             output.info("PK stopped via keyboard interruption.")
+            results['interrupted'] = True
 
         results['proxy_failed'] = proxy_latencies.count(-1)
         results['direct_failed'] = direct_latencies.count(-1)

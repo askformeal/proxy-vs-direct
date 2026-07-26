@@ -97,18 +97,19 @@ class DirectVsProxy:
 
                 results = self.contest.pk()
 
-                if self.animation:
+                if self.animation and not results['interrupted']:
                     time.sleep(AFTER_PK_PAUSE)
+
                 output()
                 self.plot.show_pk_result(results)
 
                 if self.json != DISABLED:
                     if os.path.exists(self.json) and not self.overwrite_json:
-                        output.warning(f'Failed to write into {self.json} because it already exists. You can use --overwrite-json option or --force option to overwrite this file.')
+                        output.warning(f'Failed to write into {self.json} because it already exists. You can use --overwrite-json option to overwrite this file.')
                     else:
                         try:
                             with open(self.json, 'w', encoding=self.encoding) as f:
-                                json.dump(results, f)
+                                json.dump(results, f, indent=4)
                         except OSError as e:
                             output.warning(f'Failed to write into {self.json} because ', end='')
                             if isinstance(e, PermissionError):
