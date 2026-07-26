@@ -1,5 +1,7 @@
 import argparse
 import os
+import sys
+
 from src.constants import HELP_BANNER_NARROW, HELP_BANNER_WIDE, CYAN, RESET
 from src.constants import UNDEFINED
 from src.constants import OPTION_TYPES, OPTION_TAG_NAME
@@ -116,8 +118,9 @@ class Parser(argparse.ArgumentParser):
             self.list_help_msg = list_parser.format_help()
 
     def get_args(self):
-        args = self.parse_args()
-        if args.command is None:
-            args.command = 'pk'
+        if sys.argv[1] not in ('pk', 'config'):
+            args = self.parse_args(['pk'] + sys.argv[1:])
             self.help_msg = self.format_help()
+        else:
+            args = self.parse_args()
         return args

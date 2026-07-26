@@ -4,6 +4,8 @@ All notable changes to proxy-vs-direct will be documented here.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-07-26
+
 ### Added
 - `config list` subcommand: display config file contents with TOML section grouping
 - `Validate` singleton class: unified `validate(name, val)` interface for all option validation
@@ -17,6 +19,7 @@ All notable changes to proxy-vs-direct will be documented here.
 
 ### Fixed
 - Config file option validation: KeyError mismatch between `OPTION_TYPES` keys and `Validate.type_validate_func` keys
+- Default subcommand detection: `python -m src <url>` now correctly routes to `pk` subparser instead of failing with an unrecognized argument error
 
 ## [0.5.1] - 2026-07-25
 
