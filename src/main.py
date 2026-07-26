@@ -145,6 +145,12 @@ class DirectVsProxy:
                 else:
                     self.config.show_path()
 
+            elif self.config_command == 'open':
+                if self.show_help:
+                    output.help(self.parser.open_help_msg)
+                else:
+                    self.config.open_file()
+
             elif self.config_command == 'set':
                 if self.show_help:
                     output.help(self.parser.set_help_msg)

@@ -2,6 +2,8 @@ import platformdirs
 import tomllib
 import tomli_w
 import os
+import sys
+import subprocess
 
 from src.constants import PLATFORM_DIR_NAME, CONFIG_FILE_NAME
 from src.constants import GREEN, RESET
@@ -136,3 +138,15 @@ class Config:
                     output(f'\"{e}\"', output_type='error')
             else:
                 output(f'{GREEN}Successfully set {name} to {valid_val}.{RESET}')
+
+    def open_file(self):
+        output(f'Opening {self.config_path} with your system\'s default application...')
+        if sys.platform == 'win32':
+            os.startfile(self.config_path)
+        elif sys.platform == 'darwin':
+            subprocess.run(['open', self.config_path])
+        else:
+            result = subprocess.run(['xdg-open', self.config_path], capture_output=True)
+            if result.returncode != 0:
+                msg = result.stderr.decode().strip()
+                output.error(f'Failed to open {self.config_path}: \"{msg}\". Make sure that you have xdg-open installed on your system.')
