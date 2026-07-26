@@ -12,6 +12,28 @@ class Disabled:
 UNDEFINED = Undefined()
 DISABLED = Disabled()
 
+OPTIONS_LITERAL = Literal[
+    'round',
+    'decimals',
+    'notify',
+    'encoding',
+    'user_agent',
+    'http_proxy',
+    'https_proxy',
+    'timeout',
+    'quiet',
+    'animation',
+    'color',
+    'output_file',
+    'output_mode',
+    'json',
+    'overwrite_json'
+    ]
+
+OPTIONS = []
+for name in get_args(OPTIONS_LITERAL):
+    OPTIONS.append(str(name))
+
 DEFAULTS = {
     'round': 5,
     'decimals': 2,
@@ -28,6 +50,43 @@ DEFAULTS = {
     'output_mode': 'create',
     'json': DISABLED,
     'overwrite_json': False
+}
+
+OPTION_TYPES = {
+    'round': 'pos_int',
+    'decimals': 'pos_int',
+    'notify': 'bool',
+    'encoding': 'str',
+    'user_agent': 'str',
+    'http_proxy': 'str',
+    'https_proxy': 'str',
+    'timeout': 'pos_float',
+    'quiet': 'bool',
+    'animation': 'bool',
+    'color': 'bool',
+    'output_file': 'path',
+    'output_mode': 'output_mode',
+    'json': 'path',
+    'overwrite_json': 'bool',
+}
+
+OPTION_TAG_NAME = {
+    'pos_int': 'positive integer',
+    'bool': 'boolean',
+    'str': 'string',
+    'pos_float': 'positive float',
+    'output_mode': 'output mode',
+    'path': 'file path'
+}
+
+OPTION_GROUPS = {
+    'quiet': 'output_to_terminal',
+    'animation': 'output_to_terminal',
+    'color': 'output_to_terminal',
+    'output_file': 'output_to_file',
+    'output_mode': 'output_to_file',
+    'json': 'output_to_file',
+    'overwrite_json': 'output_to_file',
 }
 
 FORCE_OUTPUT_ERROR = False
@@ -67,28 +126,6 @@ PK Rules:
   5. Final score = rounds won. Higher score wins the PK.
 '''
 
-OPTIONS_LITERAL = Literal[
-    'round',
-    'decimals',
-    'notify',
-    'encoding',
-    'user_agent',
-    'http_proxy',
-    'https_proxy',
-    'timeout',
-    'quiet',
-    'animation',
-    'color',
-    'output_file',
-    'output_mode',
-    'json',
-    'overwrite_json'
-    ]
-
-OPTIONS = []
-for name in get_args(OPTIONS_LITERAL):
-    OPTIONS.append(str(name))
-
 '''
 Where are an option deployed:
 
@@ -109,4 +146,7 @@ CLI argument in cli.py -> Parser -> __init__
 type function in cli.py if needed
 
 references in README.md
+
+Ask Monica to update this
+
 '''

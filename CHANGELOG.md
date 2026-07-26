@@ -4,6 +4,20 @@ All notable changes to proxy-vs-direct will be documented here.
 
 ## [Unreleased]
 
+### Added
+- `config list` subcommand: display config file contents with TOML section grouping
+- `Validate` singleton class: unified `validate(name, val)` interface for all option validation
+
+### Changed
+- CLI restructured: global options (`--encoding`, `--quiet`, etc.) on main parser, PK-specific options under `pk` subparser
+- `config list` output uses section grouping (`output_to_terminal`, `output_to_file`)
+- `validate.py` refactored from module-level functions to `Validate` singleton with name-based dispatch
+- `ConfigLoader` renamed to `Config` with improved validation and error reporting
+- Invalid config values are now collected and displayed separately in `config list`
+
+### Fixed
+- Config file option validation: KeyError mismatch between `OPTION_TYPES` keys and `Validate.type_validate_func` keys
+
 ## [0.5.1] - 2026-07-25
 
 ### Changed

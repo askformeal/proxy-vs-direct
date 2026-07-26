@@ -42,7 +42,7 @@ class Output:
     
     def _handle_file_errors(self, e):
         if not self.quiet:
-            self.warning(f'Failed to write into {self.path} because ', end='', skip_file=True)
+            self.warning(f'Failed to write into \"{self.path}\" because ', end='', skip_file=True)
             if isinstance(e, PermissionError):
                 self.__call__('permission is insufficient', end='', skip_file=True, output_type='warning')
             elif isinstance(e, IsADirectoryError):

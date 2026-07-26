@@ -13,7 +13,7 @@ from src.constants import DEFAULTS
 from src.constants import AFTER_PK_PAUSE, RULES, UNDEFINED, DISABLED
 from src.constants import OPTIONS, OPTIONS_LITERAL
 from src.cli import Parser
-from src.config import ConfigLoader
+from src.config import Config
 from src.output import output
 from src.contest import Contest
 from src.plot import Plot
@@ -25,9 +25,8 @@ class DirectVsProxy:
         self.parser = Parser()
         self.contest = Contest()
         self.contest.plot = self.plot
-        args = self.parser.parse_args()
-        self.config_loader = ConfigLoader()
-
+        args = self.parser.get_args()
+        self.config = Config()
         sys_proxies = urllib.request.getproxies()
         sys_http_proxy = sys_proxies.get('http', None)
         sys_https_proxy = sys_proxies.get('https', None) 
@@ -48,22 +47,27 @@ class DirectVsProxy:
             self._assign('https_proxy', sys_https_proxy, 'auto')
 
         # Layer 3: Configure file
-        config = self.config_loader.get_config()
+        config = self.config.get_config()
 
         for name, val in config.items():
             self._assign(name, val, 'config')
 
         # Layer 4: CLI inputs
 
-        for name, val in vars(args).items():
+        for name in OPTIONS:
+            val = getattr(args, name, UNDEFINED)
             if val is not UNDEFINED:
                 self._assign(name, val, 'cli')
 
-        self.contest.url = args.url
-        self.show_help = args.help
-        self.show_rules = args.rules
-
         output.flush()
+        self.config.option_source = self.option_source
+
+        self.command = args.command
+        self.config_command = getattr(args, 'config_command', None)
+        self.show_help = getattr(args, 'help', UNDEFINED)
+        self.show_rules = getattr(args, 'rules', UNDEFINED)
+        self.contest.url = getattr(args, 'url', UNDEFINED)
+        self.name = getattr(args, 'name', None)
 
         if not is_tty:
             if self.option_source['color'] == 'default':
@@ -74,52 +78,60 @@ class DirectVsProxy:
     def run(self):
         """Run proxy and direct tests, then compare results."""
 
-        if self.show_help:
-            # Show help message
-            help_msg = self.parser.get_help_msg()
-            output(help_msg)
+        if self.command == 'pk':
+            if self.show_help:
+                # Show help message
+                output(self.parser.help_msg)
 
-        elif self.show_rules:
-            # Show rules
-            output(RULES)
+            elif self.show_rules:
+                # Show rules
+                output(RULES)
+            else:
+                # Connection PK
+                if self.option_source['http_proxy'] == 'default':
+                    output.warning('No system HTTP proxy found, and will use direct connection as default. You may want to define one manually using --http-proxy.')
+                if self.option_source['https_proxy'] == 'default':
+                    output.warning('No system HTTPS proxy found, and will use direct connection as default. You may want to define one manually using --https-proxy.')
 
-        else:
-            # Connection PK
-            if self.option_source['http_proxy'] == 'default':
-                output.warning('No system HTTP proxy found, and will use direct connection as default. You may want to define one manually using --http-proxy.')
-            if self.option_source['https_proxy'] == 'default':
-                output.warning('No system HTTPS proxy found, and will use direct connection as default. You may want to define one manually using --https-proxy.')
+                self.plot.show_pk_start(self.contest.round, self.contest.timeout)
 
-            self.plot.show_pk_start(self.contest.round, self.contest.timeout)
+                results = self.contest.pk()
 
-            results = self.contest.pk()
+                if self.animation:
+                    time.sleep(AFTER_PK_PAUSE)
+                output()
+                self.plot.show_pk_result(results)
 
-            if self.animation:
-                time.sleep(AFTER_PK_PAUSE)
-            output()
-            self.plot.show_pk_result(results)
+                if self.json != DISABLED:
+                    if os.path.exists(self.json) and not self.overwrite_json:
+                        output.warning(f'Failed to write into {self.json} because it already exists. You can use --overwrite-json option or --force option to overwrite this file.')
+                    else:
+                        try:
+                            with open(self.json, 'w', encoding=self.encoding) as f:
+                                json.dump(results, f)
+                        except OSError as e:
+                            output.warning(f'Failed to write into {self.json} because ', end='')
+                            if isinstance(e, PermissionError):
+                                output('permission is insufficient.', output_type='warning')
+                            elif isinstance(e, IsADirectoryError):
+                                output('target path is a directory instead of a file.', output_type='warning')
+                            else:
+                                output(f'\"{e}\".', output_type='warning')
 
-            if self.json != DISABLED:
-                if os.path.exists(self.json) and not self.overwrite_json:
-                    output.warning(f'Failed to write into {self.json} because it already exists. You can use --overwrite-json option or --force option to overwrite this file.')
-                else:
+                if self.notify:
                     try:
-                        with open(self.json, 'w', encoding=self.encoding) as f:
-                            json.dump(results, f)
-                    except OSError as e:
-                        output.warning(f'Failed to write into {self.json} because ', end='')
-                        if isinstance(e, PermissionError):
-                            output('permission is insufficient.', output_type='warning')
-                        elif isinstance(e, IsADirectoryError):
-                            output('target path is a directory instead of a file.', output_type='warning')
-                        else:
-                            output(f'\"{e}\".', output_type='warning')
+                        notification.notify(title='Proxy vs Direct', message='PK completed')
+                    except Exception as e:
+                        output.warning(f'Failed to send system notification: {type(e).__name__}')
 
-            if self.notify:
-                try:
-                    notification.notify(title='Proxy vs Direct', message='PK completed')
-                except Exception as e:
-                    output.warning(f'Failed to send system notification: {type(e).__name__}')
+        elif self.command == 'config':
+            if self.config_command == 'list':
+                if self.show_help:
+                    output(self.parser.list_help_msg)
+                else:
+                    self.config.show_list()
+            elif self.show_help:
+                output(self.parser.config_help_msg)
     
     def _assign(self, name: OPTIONS_LITERAL, val, source: Literal['default', 'auto', 'config', 'cli']):
         if name == 'round':
