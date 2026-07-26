@@ -133,11 +133,17 @@ class Parser(argparse.ArgumentParser):
             where_parser = self._get_command_parser(config_sub, 'where', 'Show the path of configure file')
             where_parser.add_argument('-h', '--help', action=_HelpActionConfigCommand, nargs=0, help='Show the help message of config where subcommand and exit')
 
+            set_parser = self._get_command_parser(config_sub, 'set', 'Set the value of a given option in configure file')
+            set_parser.add_argument('name', type=_valid_option, metavar='[name]', help='name of the option to set')
+            set_parser.add_argument('value', type=str, metavar='[value]', help='value of the option to set')
+            set_parser.add_argument('-h', '--help', action=_HelpActionConfigCommand, nargs=0, help='Show the help message of config set subcommand and exit')
+
             self.help_msg = default_parser.format_help()
             self.config_help_msg = config_parser.format_help()
             self.list_help_msg = list_parser.format_help()
             self.show_help_msg = show_parser.format_help()
             self.where_help_msg = where_parser.format_help()
+            self.set_help_msg = set_parser.format_help()
 
 
     def _get_command_parser(self, sub, name, help_msg, description=None):

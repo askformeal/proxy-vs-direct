@@ -52,7 +52,8 @@ class Validate:
         if isinstance(val, bool):
             return val
         else:
-            return None
+            val = val.lower()
+            return {'true': True, 'false': False}.get(val, None)
 
     def valid_str(self, val):
         if isinstance(val, str):

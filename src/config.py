@@ -1,9 +1,11 @@
 import platformdirs
 import tomllib
+import tomli_w
 import os
 
 from src.constants import PLATFORM_DIR_NAME, CONFIG_FILE_NAME
-from src.constants import OPTIONS, OPTIONS_LITERAL, OPTION_GROUPS, OPTION_TYPES, OPTION_TAG_NAME
+from src.constants import GREEN, RESET
+from src.constants import OPTIONS, OPTIONS_LITERAL, OPTION_GROUPS, OPTION_TYPES, OPTION_TAG_NAME, OPTION_TYPE_NAME
 from src.validate import validate
 from src.output import output
 
@@ -106,3 +108,31 @@ class Config:
             output(f'Configure file at {self.config_path}')
         else:
             output(f'Would have load configure file from {self.config_path} but it does not exist.')
+
+    def set_option(self, name, val):
+        valid_val = validate(name, val)
+        if valid_val is None:
+            output.error(f'\"{val}\" is not a valid {OPTION_TYPE_NAME[name]}')
+        else:
+            group = OPTION_GROUPS.get(name, None)
+            if group is None:
+                # not in a group
+                self.raw_config[name] = valid_val
+            else:
+                if group in self.raw_config:
+                    # group already exists
+                    self.raw_config[group][name] = valid_val
+                else:
+                    # group does not exists
+                    self.raw_config[group] = {name: valid_val}
+            try:
+                with open(self.config_path, 'wb') as f:
+                    tomli_w.dump(self.raw_config, f)
+            except OSError as e:
+                output.error(f'Failed to write into {CONFIG_FILE_NAME} because ', end='')
+                if isinstance(e, PermissionError):
+                    output('permission is insufficient', output_type='error')
+                else:
+                    output(f'\"{e}\"', output_type='error')
+            else:
+                output(f'{GREEN}Successfully set {name} to {valid_val}.{RESET}')

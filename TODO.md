@@ -17,8 +17,10 @@
 - [X] Add `--encoding option
 - [X] Add auto use wide or narrow banner depends on terminal width feature
 - [X] Add config file
-- [X] Add `config` sub-command (list, show, set, unset, create, delete)
+- [X] Add `config` sub-command (list, show, where)
   - [X] `list` — display config file contents with section grouping
+  - [X] `show` — display the value of a given option
+  - [X] `where` — display the path of the configure file
 - [ ] Add `--show-source` option
 - [ ] Add `--config` option to specify configure file (set to "none" to skip loading configure file)
 - [ ] Add customizable connect and read timeout

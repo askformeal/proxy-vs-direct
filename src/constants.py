@@ -79,6 +79,10 @@ OPTION_TAG_NAME = {
     'path': 'file path'
 }
 
+OPTION_TYPE_NAME = {}
+for name, _type in OPTION_TYPES.items():
+    OPTION_TYPE_NAME[name] = OPTION_TAG_NAME[_type]
+
 OPTION_GROUPS = {
     'quiet': 'output_to_terminal',
     'animation': 'output_to_terminal',
