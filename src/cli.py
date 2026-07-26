@@ -1,8 +1,6 @@
 import argparse
-import os
 import sys
 
-from src.constants import HELP_BANNER_NARROW, HELP_BANNER_WIDE, CYAN, RESET
 from src.constants import UNDEFINED
 from src.constants import OPTION_TYPES, OPTION_TAG_NAME
 from src.validate import validate
@@ -54,20 +52,10 @@ class Parser(argparse.ArgumentParser):
         if is_sub_parser:
             super().__init__(**kwargs)
         else:
-            try:
-                terminal_width = os.get_terminal_size()[0]
-                if terminal_width >= 120:
-                    banner = HELP_BANNER_WIDE
-                elif terminal_width >= 45:
-                    banner = HELP_BANNER_NARROW
-                else:
-                    banner = ''
-            except OSError:
-                banner = HELP_BANNER_NARROW
-
+            
             super().__init__(prog='proxy-vs-direct',
-                            description=f'{CYAN}{banner}{RESET}Proxy vs Direct {__version__} - Make your proxy and direct connection PK on latency to a certain URL.',
-                            epilog='Examples: \\n  python -m src https://example.com -r 10\\n  python -m src https://example.com --rules',
+                            description=f'Proxy vs Direct {__version__} - Make your proxy and direct connection PK on latency to a certain URL.',
+                            epilog='Examples: \n  python -m src https://example.com -r 10\n  python -m src https://example.com --rules',
                             formatter_class=argparse.RawDescriptionHelpFormatter,
                             add_help=False
                             )
@@ -120,7 +108,11 @@ class Parser(argparse.ArgumentParser):
             self.list_help_msg = list_parser.format_help()
 
     def get_args(self):
-        if len(sys.argv) > 1 and sys.argv[1] not in ('pk', 'config'):
+        if len(sys.argv) == 1:
+            args = self.parse_args(['pk', '--help'])
+            self.help_msg = self.format_help()
+            
+        elif sys.argv[1] not in ('pk', 'config'):
             args = self.parse_args(['pk'] + sys.argv[1:])
             self.help_msg = self.format_help()
         else:

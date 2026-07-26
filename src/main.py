@@ -81,7 +81,7 @@ class DirectVsProxy:
         if self.command == 'pk':
             if self.show_help:
                 # Show help message
-                output(self.parser.help_msg)
+                output.help(self.parser.help_msg)
 
             elif self.show_rules:
                 # Show rules
@@ -127,11 +127,11 @@ class DirectVsProxy:
         elif self.command == 'config':
             if self.config_command == 'list':
                 if self.show_help:
-                    output(self.parser.list_help_msg)
+                    output.help(self.parser.list_help_msg)
                 else:
                     self.config.show_list()
             elif self.show_help:
-                output(self.parser.config_help_msg)
+                output.help(self.parser.config_help_msg)
     
     def _assign(self, name: OPTIONS_LITERAL, val, source: Literal['default', 'auto', 'config', 'cli']):
         if name == 'round':

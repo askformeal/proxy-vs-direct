@@ -127,26 +127,21 @@ PK Rules:
 '''
 
 '''
-Where are an option deployed:
+Where are options deployed:
 
-name: remove all prefix hyphens from argument name and use underscore to replace between-word ones
+Legend: option name → where it's defined / wired / validated
 
-name in constants.py -> OPTIONS_LITERAL
-default value in constants.py -> DEFAULTS
+1. Declare     → src/constants.py → OPTIONS_LITERAL (literal type alias)
+2. Default val → src/constants.py → DEFAULTS dict
+3. Type        → src/constants.py → OPTION_TYPES dict   (maps name → type tag)
+4. Type label  → src/constants.py → OPTION_TAG_NAME dict (maps type tag → human string)
+5. Group       → src/constants.py → OPTION_GROUPS dict   (maps name → TOML section)
+6. Sentinels   → src/constants.py → UNDEFINED, DISABLED
 
-wire to attributes in main.py -> DirectVsProxy -> _assign
-
-validate function in validate.py if needed
-
-name, type and group in configure file in config.py -> ConfigLoader -> get_config
-
-auto environment detection in main.py -> DirectVsProxy -> __init__ and corresponding warning/info output if needed
-
-CLI argument in cli.py -> Parser -> __init__
-type function in cli.py if needed
-
-references in README.md
-
-Ask Monica to update this
-
+7. Parsing / validation → src/validate.py  → Validate.validate(name, val)
+8. CLI argument         → src/cli.py       → Parser.__init__ (add_argument + type= via _get_validate_func)
+9. Wire to attrs        → src/main.py      → DirectVsProxy._assign(name, val, source)
+10. Layer 4 pipeline    → src/main.py      → DirectVsProxy.__init__ (default → auto → config → CLI)
+11. TOML CRUD           → src/config.py    → Config class (read / write / show_list)
+12. User docs           → README.md
 '''

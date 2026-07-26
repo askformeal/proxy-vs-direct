@@ -3,6 +3,7 @@ import io
 import sys
 import re
 
+from src.constants import HELP_BANNER_NARROW, HELP_BANNER_WIDE, CYAN, RESET
 from src.constants import ERROR, WARNING, INFO
 from src.constants import FORCE_OUTPUT_ERROR, FORCE_OUTPUT_WARNING, FORCE_OUTPUT_INFO
 from src.constants import DISABLED
@@ -81,6 +82,18 @@ class Output:
             
             self.file_ready = True
 
+    def help(self, message):
+        try:
+            terminal_width = os.get_terminal_size()[0]
+            if terminal_width >= 120:
+                banner = HELP_BANNER_WIDE
+            elif terminal_width >= 45:
+                banner = HELP_BANNER_NARROW
+            else:
+                banner = ''
+        except OSError:
+            banner = HELP_BANNER_NARROW
+        self.__call__(f'\n{CYAN}{banner}{RESET}{message}')
 
     def __call__(self, *args, force=False, skip_file=False, prefix='', output_type='normal', **kwargs): #types: normal, error, warning, info
         if self.ready:
