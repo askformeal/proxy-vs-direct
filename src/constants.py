@@ -1,5 +1,6 @@
 from typing import Literal, get_args
 import pyfiglet
+import sys
 
 class Undefined:
     def __repr__(self):
@@ -30,6 +31,7 @@ OPTIONS_LITERAL = Literal[
     'overwrite_json',
     'show_source',
     'show_value',
+    'freeze_args',
     ]
 
 OPTIONS = []
@@ -60,6 +62,7 @@ OPTION_TO_TAG = {
     'overwrite_json': 'bool',
     'show_source': 'bool',
     'show_value': 'bool',
+    'freeze_args': 'bool',
 }
 
 TAG_TO_LABEL = { # type codename -> readable name
@@ -103,6 +106,7 @@ DEFAULTS = {
     'overwrite_json': False,
     'show_source': False,
     'show_value': False,
+    'freeze_args': False,
 }
 
 FORCE_OUTPUT_ERROR = False
@@ -145,6 +149,21 @@ PK Rules:
   4. If latencies are exactly equal, it is a tie.
   5. Final score = rounds won. Higher score wins the PK.
 '''
+
+# This is NOT a for users. This is for developers (me)
+
+option_names = sorted(list(OPTIONS))
+tag_names = sorted(list(OPTION_TO_TAG.keys()))
+label_names = sorted(list(OPTION_TO_LABEL.keys()))
+default_names = sorted(list(DEFAULTS.keys()))
+
+if option_names != tag_names or option_names != label_names or option_names != default_names:
+    print('Mismatched names in constants.py:')
+    print(f'OPTIONS: {option_names}')
+    print(f'OPTION_TO_TAG: {tag_names}')
+    print(f'OPTION_TO_LABEL: {label_names}')
+    print(f'DEFAULTS: {default_names}')
+    sys.exit(1)
 
 '''
 Where are options deployed:

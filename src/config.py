@@ -37,10 +37,11 @@ class Config:
             'cli': 'CLI argument',
             }
         self.invalid_options = {}
+        self.file_exists = os.path.exists(self.config_path)
         self.corrupted = False
 
     def get_config(self) -> dict:
-            if os.path.exists(self.config_path):
+            if self.file_exists:
                 try:
                     with FilePrompter(self.config_path, 'rb', prefix=f'Failed to read configure file {self.config_path} because', level='warning') as f:
                         self.raw_config = tomllib.load(f)
@@ -130,7 +131,7 @@ class Config:
             output(f'{name}: {self.invalid_options[name]}')
 
     def show_path(self):
-        if os.path.exists(self.config_path):
+        if self.file_exists:
             output(f'Configure file at {self.config_path}')
         else:
             output(f'Would have load configure file from {self.config_path} but it does not exist.')
@@ -225,7 +226,7 @@ class Config:
                     output(f'\"{e}\".', output_type='error')
                 return
             
-        if os.path.exists(self.config_path):
+        if self.file_exists:
             output.error(f'Can not create {self.config_path} because it already exists')
         else:
             if self._apply_to_file(content={}):
@@ -247,7 +248,7 @@ class Config:
             
 
     def open_file(self):
-        if os.path.exists(self.config_path):
+        if self.file_exists:
             output(f'Opening {self.config_path} with your system\'s default application...')
             if sys.platform == 'win32':
                 os.startfile(self.config_path)
@@ -260,3 +261,13 @@ class Config:
                     output.error(f'Failed to open {self.config_path}: \"{msg}\". Make sure that you have xdg-open installed on your system.')
         else:
             output.error(f'Can not open configure file because none exists.')
+
+    @require_valid_file('freeze arguments')
+    def freeze(self, values: dict, sources: dict):
+        if not self.file_exists:
+            output.warning('Can not freeze arguments because no configure file exists.')
+        else:
+            for name in OPTIONS:
+                if name != 'freeze_args': # easy to accidentally trigger unwanted freezes if write into file with other options
+                    if sources[name] == 'cli':
+                        self.set_option(name, values[name])

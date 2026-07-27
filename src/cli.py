@@ -77,6 +77,7 @@ class Parser(argparse.ArgumentParser):
             group_terminal.add_argument('--color', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Enable/disable colors for better compatibility')
             group_terminal.add_argument('--show-source', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Show from which source each option is loaded')
             group_terminal.add_argument('--show-value', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Show the value of each option')
+            group_terminal.add_argument('--freeze-args', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Freeze all given CLI arguments except --freeze-args to configure file. Existing option may be overwrote')
 
             group_file = self.public_parser.add_argument_group('Output to File')
             group_file.add_argument('--output-file', default=UNDEFINED, help='A path of a file to write outputs into')

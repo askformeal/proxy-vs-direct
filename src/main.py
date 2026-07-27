@@ -29,6 +29,7 @@ class ProxyVsDirect:
         self.overwrite_json = None
         self.show_source = None
         self.show_value = None
+        self.freeze = None
 
         self.option_source = {}
         self.option_value = {}
@@ -98,6 +99,9 @@ class ProxyVsDirect:
 
         if self.show_value or self.show_source:
             self.plot.show_source(*option_info)
+
+        if self.freeze:
+            self.config.freeze(self.option_value, self.option_source)
 
         if self.command == 'pk':
             if self.show_help:
@@ -237,6 +241,8 @@ class ProxyVsDirect:
             self.show_source = val
         elif name == 'show_value':
             self.show_value = val
+        elif name == 'freeze_args':
+            self.freeze = val
 
         self.option_source[name] = source
         self.option_value[name] = val
