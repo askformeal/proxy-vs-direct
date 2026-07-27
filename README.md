@@ -16,9 +16,11 @@ python -m src <url>                                       # 'pk' is assumed when
 | Option | Description | Default |
 |--------|-------------|---------|
 | `--encoding ENCODING` | File encoding for output | `utf-8` |
-| `--quiet, --no-quiet` | Suppress/allow terminal output | auto (TTY) |
-| `--animation, --no-animation` | Toggle real-time round status animation | auto (TTY) |
-| `--color, --no-color` | Toggle ANSI colors | auto (TTY) |
+| `--quiet, --no-quiet` | Enable/disable terminal output | auto (TTY) |
+| `--animation, --no-animation` | Enable/disable real-time round status animation | auto (TTY) |
+| `--color, --no-color` | Enable/disable ANSI colors | auto (TTY) |
+| `--show-source, --no-show-source` | Show from which source each option is loaded | off |
+| `--show-value, --no-show-value` | Show the value of each option | off |
 | `--output-file PATH` | Write output to a file | disabled |
 | `--output-mode MODE` | File write mode: `create` / `overwrite` / `append` | `create` |
 
@@ -75,7 +77,13 @@ python -m src config where
 
 Global help (`python -m src -h`):
 ```
-usage: proxy-vs-direct {pk,config} ...
+usage: proxy-vs-direct [--encoding ENCODING] [--quiet | --no-quiet]
+                       [--animation | --no-animation] [--color | --no-color]
+                       [--show-source | --no-show-source]
+                       [--show-value | --no-show-value]
+                       [--output-file OUTPUT_FILE]
+                       [--output-mode {default,create,overwrite,append}]
+                       {pk,config} ...
 
 Proxy vs Direct 0.6.0 - Make your proxy and direct connection PK on latency to a certain URL.
 
@@ -84,6 +92,25 @@ positional arguments:
     pk         Start Proxy vs Direct PK to a given URL. This subcommand will
                be used if none is given
     config     Edit and examine configure file
+
+options:
+  --encoding ENCODING   File encoding for output (default: utf-8)
+
+Output to Terminal:
+  --quiet, --no-quiet   Enable/disable terminal outputs
+  --animation, --no-animation
+                        Enable/disable animations for better compatibility
+  --color, --no-color   Enable/disable colors for better compatibility
+  --show-source, --no-show-source
+                        Show from which source each option is loaded
+  --show-value, --no-show-value
+                        Show the value of each option
+
+Output to File:
+  --output-file OUTPUT_FILE
+                        A path of a file to write outputs into
+  --output-mode {default,create,overwrite,append}
+                        Output to file modes: [create/overwrite/append]
 
 GitHub Repository:
   https://github.com/askformeal/proxy-vs-direct
@@ -101,7 +128,10 @@ PK subcommand help (`python -m src pk -h`):
 ```
 usage: proxy-vs-direct pk [--encoding ENCODING] [--quiet | --no-quiet]
                           [--animation | --no-animation]
-                          [--color | --no-color] [--output-file OUTPUT_FILE]
+                          [--color | --no-color]
+                          [--show-source | --no-show-source]
+                          [--show-value | --no-show-value]
+                          [--output-file OUTPUT_FILE]
                           [--output-mode {default,create,overwrite,append}]
                           [-r ROUND] [-d DECIMALS] [--rules]
                           [-n | --notify | --no-notify] [-j JSON]
@@ -131,10 +161,14 @@ options:
   -v, --version         Show version info
 
 Output to Terminal:
-  --quiet, --no-quiet   Disable terminal outputs
+  --quiet, --no-quiet   Enable/disable terminal outputs
   --animation, --no-animation
-                        Toggle animations for better compatibility
-  --color, --no-color   Toggle colors for better compatibility
+                        Enable/disable animations for better compatibility
+  --color, --no-color   Enable/disable colors for better compatibility
+  --show-source, --no-show-source
+                        Show from which source each option is loaded
+  --show-value, --no-show-value
+                        Show the value of each option
 
 Output to File:
   --output-file OUTPUT_FILE
@@ -158,6 +192,8 @@ Here's the config help (`python -m src config -h`):
 usage: proxy-vs-direct config [--encoding ENCODING] [--quiet | --no-quiet]
                               [--animation | --no-animation]
                               [--color | --no-color]
+                              [--show-source | --no-show-source]
+                              [--show-value | --no-show-value]
                               [--output-file OUTPUT_FILE]
                               [--output-mode {default,create,overwrite,append}]
                               [-h]
@@ -184,10 +220,14 @@ options:
   -h, --help            Show the help message of config subcommand and exit
 
 Output to Terminal:
-  --quiet, --no-quiet   Disable terminal outputs
+  --quiet, --no-quiet   Enable/disable terminal outputs
   --animation, --no-animation
-                        Toggle animations for better compatibility
-  --color, --no-color   Toggle colors for better compatibility
+                        Enable/disable animations for better compatibility
+  --color, --no-color   Enable/disable colors for better compatibility
+  --show-source, --no-show-source
+                        Show from which source each option is loaded
+  --show-value, --no-show-value
+                        Show the value of each option
 
 Output to File:
   --output-file OUTPUT_FILE

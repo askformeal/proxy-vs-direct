@@ -27,7 +27,9 @@ OPTIONS_LITERAL = Literal[
     'output_file',
     'output_mode',
     'json',
-    'overwrite_json'
+    'overwrite_json',
+    'show_source',
+    'show_value',
     ]
 
 OPTIONS = []
@@ -56,6 +58,8 @@ OPTION_TO_TAG = {
     'output_mode': 'output_mode',
     'json': 'path',
     'overwrite_json': 'bool',
+    'show_source': 'bool',
+    'show_value': 'bool',
 }
 
 TAG_TO_LABEL = { # type codename -> readable name
@@ -96,7 +100,9 @@ DEFAULTS = {
     'output_file': DISABLED,
     'output_mode': 'create',
     'json': DISABLED,
-    'overwrite_json': False
+    'overwrite_json': False,
+    'show_source': False,
+    'show_value': False,
 }
 
 FORCE_OUTPUT_ERROR = False
@@ -124,6 +130,8 @@ PLATFORM_DIR_NAME = 'proxy-vs-direct'
 CONFIG_FILE_NAME = 'config.toml'
 
 AFTER_PK_PAUSE = 1
+
+SHOW_VALUE_MAX_LEN = 35
 
 HELP_BANNER_NARROW =  pyfiglet.figlet_format('P vs D', font='ansi_shadow', width=200)
 HELP_BANNER_WIDE =  pyfiglet.figlet_format('Proxy vs Direct', font='ansi_shadow', width=200)

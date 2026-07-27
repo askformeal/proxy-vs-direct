@@ -243,17 +243,20 @@ class Config:
             else:
                 output(f'\"{e}\"', output_type='error')
         else:
-            output(f'{GREEN}Successfully purge {self.config_path}.{RESET}')
+            output(f'{GREEN}Successfully purged {self.config_path}.{RESET}')
             
 
     def open_file(self):
-        output(f'Opening {self.config_path} with your system\'s default application...')
-        if sys.platform == 'win32':
-            os.startfile(self.config_path)
-        elif sys.platform == 'darwin':
-            subprocess.run(['open', self.config_path])
+        if os.path.exists(self.config_path):
+            output(f'Opening {self.config_path} with your system\'s default application...')
+            if sys.platform == 'win32':
+                os.startfile(self.config_path)
+            elif sys.platform == 'darwin':
+                subprocess.run(['open', self.config_path])
+            else:
+                result = subprocess.run(['xdg-open', self.config_path], capture_output=True)
+                if result.returncode != 0:
+                    msg = result.stderr.decode().strip()
+                    output.error(f'Failed to open {self.config_path}: \"{msg}\". Make sure that you have xdg-open installed on your system.')
         else:
-            result = subprocess.run(['xdg-open', self.config_path], capture_output=True)
-            if result.returncode != 0:
-                msg = result.stderr.decode().strip()
-                output.error(f'Failed to open {self.config_path}: \"{msg}\". Make sure that you have xdg-open installed on your system.')
+            output.error(f'Can not open configure file because none exists.')

@@ -67,6 +67,22 @@ class Parser(argparse.ArgumentParser):
         if is_sub_parser:
             super().__init__(**kwargs)
         else:
+            # ----- public parser -----
+            self.public_parser = argparse.ArgumentParser(add_help=False)
+            self.public_parser.add_argument('--encoding', default=UNDEFINED, help='File encoding for output (default: utf-8)')
+
+            group_terminal = self.public_parser.add_argument_group('Output to Terminal')
+            group_terminal.add_argument('--quiet', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Enable/disable terminal outputs')
+            group_terminal.add_argument('--animation', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Enable/disable animations for better compatibility')
+            group_terminal.add_argument('--color', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Enable/disable colors for better compatibility')
+            group_terminal.add_argument('--show-source', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Show from which source each option is loaded')
+            group_terminal.add_argument('--show-value', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Show the value of each option')
+
+            group_file = self.public_parser.add_argument_group('Output to File')
+            group_file.add_argument('--output-file', default=UNDEFINED, help='A path of a file to write outputs into')
+            group_file.add_argument('--output-mode', default=UNDEFINED, choices=['default', 'create', 'overwrite', 'append'], help='Output to file modes: [create/overwrite/append]')
+
+
             epilog = '\n'.join((f'{GREEN}GitHub Repository:{RESET}',
                                f'  {BLUE}https://github.com/askformeal/proxy-vs-direct{RESET}',
                                f'\n{GREEN}If you encounter a problem or want to give a suggestion, please send a feedback by:{RESET}',
@@ -77,25 +93,14 @@ class Parser(argparse.ArgumentParser):
                                '  python -m src https://example.com --rules'))
             super().__init__(prog='proxy-vs-direct',
                             description=f'Proxy vs Direct {__version__} - Make your proxy and direct connection PK on latency to a certain URL.',
+                            parents=[self.public_parser],
                             epilog=epilog,
                             formatter_class=argparse.RawDescriptionHelpFormatter,
                             add_help=False
                             )
 
-            # ----- public parser -----
-            self.public_parser = argparse.ArgumentParser(add_help=False)
-            self.public_parser.add_argument('--encoding', default=UNDEFINED, help='File encoding for output (default: utf-8)')
-
-            group_terminal = self.public_parser.add_argument_group('Output to Terminal')
-            group_terminal.add_argument('--quiet', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Disable terminal outputs')
-            group_terminal.add_argument('--animation', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Toggle animations for better compatibility')
-            group_terminal.add_argument('--color', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Toggle colors for better compatibility')
-
-            group_file = self.public_parser.add_argument_group('Output to File')
-            group_file.add_argument('--output-file', default=UNDEFINED, help='A path of a file to write outputs into')
-            group_file.add_argument('--output-mode', default=UNDEFINED, choices=['default', 'create', 'overwrite', 'append'], help='Output to file modes: [create/overwrite/append]')
-
-            command_sub = self.add_subparsers(dest='command', required=False)
+            
+            command_sub = self.add_subparsers(dest='command', required=False)                
 
             # ----- default (pk) parser -----
             default_parser = self._get_command_parser(command_sub, 'pk','Start Proxy vs Direct PK to a given URL. This subcommand will be used if none is given')

@@ -21,7 +21,17 @@ from src.file_prompt import FilePrompter
 
 class ProxyVsDirect:
     def __init__(self):
+        # Just to make things cleaner
+        self.notify = None
+        self.encoding = None
+        self.animation = None
+        self.json = None
+        self.overwrite_json = None
+        self.show_source = None
+        self.show_value = None
+
         self.option_source = {}
+        self.option_value = {}
         self.plot = Plot()
         self.parser = Parser()
         self.contest = Contest()
@@ -79,6 +89,15 @@ class ProxyVsDirect:
 
     def run(self):
         """Run proxy and direct tests, then compare results."""
+
+        option_info = [None, None]
+        if self.show_source:
+            option_info[0] = self.option_source
+        if self.show_value:
+            option_info[1] = self.option_value
+
+        if self.show_value or self.show_source:
+            self.plot.show_source(*option_info)
 
         if self.command == 'pk':
             if self.show_help:
@@ -214,4 +233,10 @@ class ProxyVsDirect:
             self.json = val
         elif name == 'overwrite_json':
             self.overwrite_json = val
+        elif name == 'show_source':
+            self.show_source = val
+        elif name == 'show_value':
+            self.show_value = val
+
         self.option_source[name] = source
+        self.option_value[name] = val

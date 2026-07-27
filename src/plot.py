@@ -1,10 +1,67 @@
 from src.output import output
 from src.constants import BOLD, DIM, RED, GREEN, YELLOW, CYAN, RESET
+from src.constants import OPTIONS, SHOW_VALUE_MAX_LEN
 import time
 
 class Plot:
     def __init__(self):
         self.decimals = 0
+
+    def show_source(self, sources: dict, values: dict):
+        colors = {
+            'default': DIM,
+            'auto': YELLOW,
+            'config': CYAN,
+            'cli': GREEN,
+        }
+
+        labels = {
+            'default': 'Default value',
+            'auto': 'Automatic environment detection',
+            'config': 'Configure file',
+            'cli': 'Command-Line Interface argument', # because apparently "CLI arguments" is too short
+        }
+
+        max_value_len = 0
+        if values is not None:
+            for name in values.keys():
+                values[name] = str(values[name])
+                val = values[name]
+                if len(val) > SHOW_VALUE_MAX_LEN:
+                    values[name] = val[:SHOW_VALUE_MAX_LEN-3]+'...'
+                    max_value_len = SHOW_VALUE_MAX_LEN
+                elif len(val) > max_value_len:
+                    max_value_len = len(val)
+
+        max_name_len = 0
+        for name in OPTIONS:
+            if len(name) > max_name_len:
+                max_name_len = len(name)
+
+        width = 50
+        output(f'{DIM}{"─" * width}{RESET}')
+        output(f'{BOLD}{CYAN}  Option Info{RESET}')
+        output(f'{DIM}{"─" * width}{RESET}')
+        output()
+
+        for name in OPTIONS:
+            pad = ' ' * (max_name_len - len(name) + 2)
+            info = f'{name}:{pad}'
+            if values is not None:
+                val = str(values[name])
+                pad = ' ' * (max_value_len - len(val) + 2)
+                info += f'{val}{pad}'
+
+            if sources is not None:
+                source = sources[name]
+                color = colors[source]
+                label = labels[source]
+                info += f'{color}{label}{RESET}'
+
+            info = info.strip()
+            output(info)
+        
+        output()
 
     def show_pk_start(self, round, timeout):
         title = f'PROXY vs DIRECT: {round} request(s) each, {timeout}s timeout'
