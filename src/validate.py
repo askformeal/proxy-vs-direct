@@ -1,6 +1,6 @@
 from urllib.parse import urlparse
 from src.output import output
-from src.constants import OPTION_TYPES, OPTION_TAG_NAME, DISABLED
+from src.constants import OPTION_TO_TAG, DISABLED
 
 class Validate:
     def __init__(self):
@@ -14,7 +14,7 @@ class Validate:
         }
 
     def __call__(self, name, val):
-        option_type = OPTION_TYPES[name]
+        option_type = OPTION_TO_TAG[name]
         func = self.type_validate_func[option_type]
         return func(val)
 

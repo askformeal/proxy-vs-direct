@@ -8,9 +8,10 @@ import copy
 
 from src.constants import PLATFORM_DIR_NAME, CONFIG_FILE_NAME
 from src.constants import GREEN, RESET
-from src.constants import OPTIONS, OPTIONS_LITERAL, OPTION_GROUPS, OPTION_TYPES, OPTION_TAG_NAME, OPTION_TYPE_NAME
+from src.constants import OPTIONS, OPTIONS_LITERAL, OPTION_SECTION, OPTION_TO_LABEL
 from src.validate import validate
 from src.output import output
+from src.file_prompt import FilePrompter
 
 def require_valid_file(action):
     def decorator(func):
@@ -38,60 +39,53 @@ class Config:
         self.invalid_options = {}
         self.corrupted = False
 
-    def _assign_option(self, name: OPTIONS_LITERAL, group=''):
-        if group == '':
+    def get_config(self) -> dict:
+            if os.path.exists(self.config_path):
+                try:
+                    with FilePrompter(self.config_path, 'rb', prefix=f'Failed to read configure file {self.config_path} because', level='warning') as f:
+                        self.raw_config = tomllib.load(f)
+
+                except Exception:
+                    self.corrupted = True
+                    return {}
+                else:
+                    for name in OPTIONS:
+                        section = OPTION_SECTION.get(name, '')
+                        self._assign_option(name, section)
+                    return self.options
+                                        
+            else:
+                output.info(f'Configure file {self.config_path} not found and will be skipped.')
+                return {}
+
+    def _assign_option(self, name: OPTIONS_LITERAL, section=''):
+        if section == '':
             father = self.raw_config
         else:
-            father = self.raw_config.get(group, None)
+            father = self.raw_config.get(section, None)
 
         if father is not None:
             val = father.get(name, None)
             if val is not None:
                 valid_val = validate(name, val)
                 if valid_val is None:
-                    option_type = OPTION_TYPES[name]
-                    type_name = OPTION_TAG_NAME[option_type]
+                    type_name = OPTION_TO_LABEL[name]
                     output.warning(f'Failed to load option \"{name}\" because its value \"{val}\" is not a valid {type_name}.')
                     self.invalid_options[name] = f'{val} is not a valid {type_name}'
                 else:
                     self.options[name] = valid_val
 
-    def get_config(self) -> dict:
-        if os.path.exists(self.config_path):
-            try:
-                with open(self.config_path, 'rb') as f:
-                    self.raw_config = tomllib.load(f)
-            except (OSError, tomllib.TOMLDecodeError) as e:
-                output.warning(f'Failed to read configure file {self.config_path} because ', end='')
-                if isinstance(e, PermissionError):
-                    output('permission is insufficient.', output_type='warning')
-                elif isinstance(e, tomllib.TOMLDecodeError):
-                    output('it is not a valid TOML file.', output_type='warning')
-                else:
-                    output(f'{type(e).__name__}', output_type='warning')
-                self.corrupted = True
-                return {}
-            else:
-                for name in OPTIONS:
-                    group = OPTION_GROUPS.get(name, '')
-                    self._assign_option(name, group)
-                return self.options
-                                    
-        else:
-            output.info(f'Configure file {self.config_path} not found and will be skipped.')
-            return {}
-
-    def _group_options(self, options: dict) -> dict:
+    def _section_options(self, options: dict) -> dict:
         result = {}
         for name, val in options.items():
-            group = OPTION_GROUPS.get(name, None)
-            if group is None:
+            section = OPTION_SECTION.get(name, None)
+            if section is None:
                 result[name] = val
             else:
-                if group in result:
-                    result[group][name] = val
+                if section in result:
+                    result[section][name] = val
                 else:
-                    result[group] = {name: val}
+                    result[section] = {name: val}
         return result
 
     def _output_options(self, options, indent=0):
@@ -103,14 +97,29 @@ class Config:
             else:
                 output(f'{pad}{name}: {val}')
 
+    def _apply_to_file(self, content=None): # return value: ok or NOT ok
+            if content is None:
+                content = self.raw_config
+
+            try:
+                with FilePrompter(self.config_path, 'wb', 
+                                prefix=f'Failed to write into {CONFIG_FILE_NAME} because', 
+                                error_prompt={FileNotFoundError: f'{self.config_dir} does not exist. You can use config create subcommand to create one'}
+                                ) as f:
+                    tomli_w.dump(content, f)
+            except Exception:
+                return False
+            else:
+                return True
+
     @require_valid_file('show option list')
     def show_list(self):
         output(f'These following options are set in {CONFIG_FILE_NAME}:')
-        options = self._group_options(self.options)
+        options = self._section_options(self.options)
         self._output_options(options, 1)
         if self.invalid_options != {}:
             output(f'These following options are set in {CONFIG_FILE_NAME} but their values are not valid:')
-            options = self._group_options(self.invalid_options)
+            options = self._section_options(self.invalid_options)
             self._output_options(options, 1)
 
     @require_valid_file('show option')
@@ -126,45 +135,46 @@ class Config:
         else:
             output(f'Would have load configure file from {self.config_path} but it does not exist.')
 
-    def _apply_to_file(self, content=None): # return value: ok or NOT ok
-        if content is None:
-            content = self.raw_config
-
-        try:
-            with open(self.config_path, 'wb') as f:
-                tomli_w.dump(content, f)
-        except OSError as e:
-            output.error(f'Failed to write into {CONFIG_FILE_NAME} because ', end='')
-            if isinstance(e, PermissionError):
-                output('permission is insufficient', output_type='error')
-            elif isinstance(e, FileNotFoundError):
-                output(f'{self.config_dir} does not exist. You can use config create subcommand to create one.', output_type='warning')
-            else:
-                output(f'\"{e}\"', output_type='error')
-            return False
-        else:
-            return True
-
     @require_valid_file('set option')
     def set_option(self, name, val):
         valid_val = validate(name, val)
         if valid_val is None:
-            output.error(f'\"{val}\" is not a valid {OPTION_TYPE_NAME[name]}')
+            output.error(f'\"{val}\" is not a valid {OPTION_TO_LABEL[name]}')
         else:
-            group = OPTION_GROUPS.get(name, None)
-            if group is None:
-                # not in a group
+            section = OPTION_SECTION.get(name, None)
+            if section is None:
+                # not in a section
                 self.raw_config[name] = valid_val
             else:
-                if group in self.raw_config:
-                    # group already exists
-                    self.raw_config[group][name] = valid_val
+                if section in self.raw_config:
+                    # section already exists
+                    self.raw_config[section][name] = valid_val
                 else:
-                    # group does not exists
-                    self.raw_config[group] = {name: valid_val}
+                    # section does not exists
+                    self.raw_config[section] = {name: valid_val}
            
             if self._apply_to_file():
                 output(f'{GREEN}Successfully set {name} to {valid_val}.{RESET}')
+
+    @require_valid_file('delete option')
+    def unset_option(self, name, apply=True):
+        section = OPTION_SECTION.get(name, None)
+        if section is None:
+            father = self.raw_config
+        else:
+            father = self.raw_config.get(section, None)
+
+        if father is not None and name in father:
+            del father[name]
+
+            if father == {} and section is not None:
+                del self.raw_config[section]
+
+            if apply:
+                if self._apply_to_file():
+                    output(f'{GREEN}Successfully deleted {name}.{RESET}')
+        else:
+            output.error(f'Failed to delete {name} because it does not exist in the configure file.')
 
     @require_valid_file('clean file')
     def clean_file(self):
@@ -182,7 +192,7 @@ class Config:
         undefined_count = 0
         raw_config_copy = copy.deepcopy(self.raw_config)
         for name, _ in raw_config_copy.items():
-            if name not in OPTIONS + list(OPTION_GROUPS.values()):
+            if name not in OPTIONS + list(OPTION_SECTION.values()):
                 del self.raw_config[name]
                 output(f'  Deleted {name}')
                 undefined_count += 1
@@ -199,26 +209,6 @@ class Config:
         else:
             output(f'{GREEN}Configure file clean{RESET}')
 
-    @require_valid_file('delete option')
-    def unset_option(self, name, apply=True):
-        group = OPTION_GROUPS.get(name, None)
-        if group is None:
-            father = self.raw_config
-        else:
-            father = self.raw_config.get(group, None)
-
-        if father is not None and name in father:
-            del father[name]
-
-            if father == {} and group is not None:
-                del self.raw_config[group]
-
-            if apply:
-                if self._apply_to_file():
-                    output(f'{GREEN}Successfully deleted {name}.{RESET}')
-        else:
-            output.error(f'Failed to delete {name} because it does not exist in the configure file.')
-
     def create_file(self):
         if not os.path.isdir(self.config_dir):
             try:
@@ -229,7 +219,7 @@ class Config:
                     output('a file of the same name and path already exists.', output_type='error')
                 elif isinstance(e, PermissionError):
                     output('permission is insufficient', output_type='error')
-                elif isinstance(e, IsADirectoryError):
+                elif isinstance(e, NotADirectoryError):
                     output('part of the path is file, not directory.', output_type='error')
                 else:
                     output(f'\"{e}\".', output_type='error')

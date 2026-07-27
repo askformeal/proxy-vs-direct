@@ -2,7 +2,7 @@ import argparse
 import sys
 
 from src.constants import UNDEFINED, DIM, GREEN, BLUE, RESET
-from src.constants import OPTIONS, OPTION_TYPES, OPTION_TAG_NAME
+from src.constants import OPTIONS, OPTION_TO_TAG, TAG_TO_LABEL
 from src.validate import validate
 
 from src import __version__
@@ -19,7 +19,7 @@ def _get_validate_func(name):
 def _option_validate(name, val):
     valid_val = validate(name, val)
     if valid_val is None:
-        type_name = OPTION_TAG_NAME[OPTION_TYPES[name]]
+        type_name = TAG_TO_LABEL[OPTION_TO_TAG[name]]
         raise argparse.ArgumentTypeError(f'{val} is not a {type_name}')
     else:
         return valid_val

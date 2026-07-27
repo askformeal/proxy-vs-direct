@@ -43,6 +43,13 @@ class Output:
                 self.__call__(*args, **kwargs)
             self.stash = []
     
+    def _write_file(self, content, mode):
+        try:
+            with open(self.path, mode=mode, encoding=self.encoding) as f:
+                f.write(strip_ansi(content))
+        except OSError as e:
+            self._handle_file_errors(e)
+
     def _handle_file_errors(self, e):
         if not self.quiet:
             self.warning(f'Failed to write into \"{self.path}\" because ', end='', skip_file=True)
@@ -54,13 +61,6 @@ class Output:
                 self.__call__(f'"{e}"', end='', skip_file=True, output_type='warning')
             self.__call__('and outputs to file will be disabled.', skip_file=True, output_type='warning')
         self.path = DISABLED
-
-    def _write_file(self, content, mode):
-        try:
-            with open(self.path, mode=mode, encoding=self.encoding) as f:
-                f.write(strip_ansi(content))
-        except OSError as e:
-            self._handle_file_errors(e)
 
     def _handle_file_write(self, content):
         if self.file_ready:

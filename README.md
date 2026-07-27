@@ -75,30 +75,60 @@ python -m src config where
 
 Global help (`python -m src -h`):
 ```
-usage: proxy-vs-direct [--encoding ENCODING] [--quiet | --no-quiet]
-                       [--animation | --no-animation] [--color | --no-color]
-                       [--output-file OUTPUT_FILE]
-                       [--output-mode {default,create,overwrite,append}] [-h]
-                       {pk,config} ...
+usage: proxy-vs-direct {pk,config} ...
 
-██████╗     ██╗   ██╗███████╗    ██████╗
-██╔══██╗    ██║   ██║██╔════╝    ██╔══██╗
-██████╔╝    ██║   ██║███████╗    ██║  ██║
-██╔═══╝     ╚██╗ ██╔╝╚════██║    ██║  ██║
-██║          ╚████╔╝ ███████║    ██████╔╝
-╚═╝           ╚═══╝  ╚══════╝    ╚═════╝
-
-Proxy vs Direct 0.5.1 - Make your proxy and direct connection PK on latency to a certain URL.
+Proxy vs Direct 0.6.0 - Make your proxy and direct connection PK on latency to a certain URL.
 
 positional arguments:
   {pk,config}
-    pk                  Start Proxy vs Direct PK to a given URL. This
-                        subcommand will be used if none is given
-    config              Edit and examine configures
+    pk         Start Proxy vs Direct PK to a given URL. This subcommand will
+               be used if none is given
+    config     Edit and examine configure file
+
+GitHub Repository:
+  https://github.com/askformeal/proxy-vs-direct
+
+If you encounter a problem or want to give a suggestion, please send a feedback by:
+  Create an issue at https://github.com/askformeal/proxy-vs-direct/issues
+  Send an E-Mail to muzhi1014@outlook.com
+
+Examples:
+  python -m src https://example.com -r 10
+  python -m src https://example.com --rules
+```
+
+PK subcommand help (`python -m src pk -h`):
+```
+usage: proxy-vs-direct pk [--encoding ENCODING] [--quiet | --no-quiet]
+                          [--animation | --no-animation]
+                          [--color | --no-color] [--output-file OUTPUT_FILE]
+                          [--output-mode {default,create,overwrite,append}]
+                          [-r ROUND] [-d DECIMALS] [--rules]
+                          [-n | --notify | --no-notify] [-j JSON]
+                          [--overwrite-json | --no-overwrite-json] [-h] [-v]
+                          [--user-agent USER_AGENT] [--http-proxy HTTP_PROXY]
+                          [--https-proxy HTTPS_PROXY] [-t TIMEOUT]
+                          [url]
+
+Start Proxy vs Direct PK to a given URL. This subcommand will be used if none
+is given
+
+positional arguments:
+  [url]                 Target URL.
 
 options:
   --encoding ENCODING   File encoding for output (default: utf-8)
+  -r, --round ROUND     Number of rounds to PK
+  -d, --decimals DECIMALS
+                        Decimal precision
+  --rules               Show PK rules
+  -n, --notify, --no-notify
+                        Send system notify on completion
+  -j, --json JSON       A path of a json file to write PK result into
+  --overwrite-json, --no-overwrite-json
+                        Overwrite existing json file
   -h, --help            Show this help message and exit
+  -v, --version         Show version info
 
 Output to Terminal:
   --quiet, --no-quiet   Disable terminal outputs
@@ -111,32 +141,6 @@ Output to File:
                         A path of a file to write outputs into
   --output-mode {default,create,overwrite,append}
                         Output to file modes: [create/overwrite/append]
-```
-
-PK subcommand help (`python -m src pk -h`):
-```
-usage: proxy-vs-direct pk [-r ROUND] [-d DECIMALS] [--rules]
-                          [-n | --notify | --no-notify] [-j JSON]
-                          [--overwrite-json | --no-overwrite-json] [-h] [-v]
-                          [--user-agent USER_AGENT] [--http-proxy HTTP_PROXY]
-                          [--https-proxy HTTPS_PROXY] [-t TIMEOUT]
-                          [url]
-
-positional arguments:
-  [url]                 Target URL.
-
-options:
-  -r, --round ROUND     Number of rounds to PK
-  -d, --decimals DECIMALS
-                        Decimal precision
-  --rules               Show PK rules
-  -n, --notify, --no-notify
-                        Send system notify on completion
-  -j, --json JSON       A path of a json file to write PK result into
-  --overwrite-json, --no-overwrite-json
-                        Overwrite existing json file
-  -h, --help            Show this help message and exit
-  -v, --version         Show version info
 
 Request:
   --user-agent USER_AGENT
@@ -151,22 +155,45 @@ Request:
 Here's the config help (`python -m src config -h`):
 
 ```
-usage: proxy-vs-direct config [-h] {list,show,where,open,set,unset,clean,create,purge} ...
+usage: proxy-vs-direct config [--encoding ENCODING] [--quiet | --no-quiet]
+                              [--animation | --no-animation]
+                              [--color | --no-color]
+                              [--output-file OUTPUT_FILE]
+                              [--output-mode {default,create,overwrite,append}]
+                              [-h]
+                              {list,show,where,open,set,unset,clean,create,purge} ...
+
+Edit and examine configure file
 
 positional arguments:
   {list,show,where,open,set,unset,clean,create,purge}
-    list          List all options in configure file
-    show          Show the value of a given option
-    where         Show the path of configure file
-    open          Open configure file with the default app
-    set           Set the value of a given option
-    unset         Delete a given option in configure file
-    clean         Clean file by deleting invalid/undefined options
-    create        Create an empty configure file if none exists
-    purge         Delete configure file
+    list                List all options in configure file
+    show                Show the value of a given option in configure file
+    where               Show the path of configure file
+    open                Open configure file with the default application of
+                        the current system
+    set                 Set the value of a given option in configure file
+    unset               Delete a given option in configure file
+    clean               Clean configure file by deleting all invalid or
+                        undefined options
+    create              Create an empty configure file if none exists
+    purge               Delete configure file
 
 options:
-  -h, --help  Show help message of config subcommand and exit
+  --encoding ENCODING   File encoding for output (default: utf-8)
+  -h, --help            Show the help message of config subcommand and exit
+
+Output to Terminal:
+  --quiet, --no-quiet   Disable terminal outputs
+  --animation, --no-animation
+                        Toggle animations for better compatibility
+  --color, --no-color   Toggle colors for better compatibility
+
+Output to File:
+  --output-file OUTPUT_FILE
+                        A path of a file to write outputs into
+  --output-mode {default,create,overwrite,append}
+                        Output to file modes: [create/overwrite/append]
 ```
 
 ### PK Result

@@ -17,8 +17,9 @@ from src.config import Config
 from src.output import output
 from src.contest import Contest
 from src.plot import Plot
+from src.file_prompt import FilePrompter
 
-class DirectVsProxy:
+class ProxyVsDirect:
     def __init__(self):
         self.option_source = {}
         self.plot = Plot()
@@ -109,16 +110,11 @@ class DirectVsProxy:
                         output.warning(f'Failed to write into {self.json} because it already exists. You can use --overwrite-json option to overwrite this file.')
                     else:
                         try:
-                            with open(self.json, 'w', encoding=self.encoding) as f:
+                            with FilePrompter(self.json, 'w', encoding=self.encoding, prefix=f'Failed to write into {self.json} because') as f:
                                 json.dump(results, f, indent=4)
-                        except OSError as e:
-                            output.warning(f'Failed to write into {self.json} because ', end='')
-                            if isinstance(e, PermissionError):
-                                output('permission is insufficient.', output_type='warning')
-                            elif isinstance(e, IsADirectoryError):
-                                output('target path is a directory instead of a file.', output_type='warning')
-                            else:
-                                output(f'\"{e}\".', output_type='warning')
+                        except Exception:
+                            # Error prompt already sent by FilePrompter. Nothing to do here.
+                            ...
 
                 if self.notify:
                     try:

@@ -34,25 +34,13 @@ OPTIONS = []
 for name in get_args(OPTIONS_LITERAL):
     OPTIONS.append(str(name))
 
-DEFAULTS = {
-    'round': 5,
-    'decimals': 2,
-    'notify': False,
-    'encoding': 'utf-8',
-    'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
-    'http_proxy': None,
-    'https_proxy': None,
-    'timeout': 5.0,
-    'quiet': False,
-    'animation': False,
-    'color': False,
-    'output_file': DISABLED,
-    'output_mode': 'create',
-    'json': DISABLED,
-    'overwrite_json': False
-}
+'''
+OPTION = option names (round, user_agent, json, etc)
+TAG = in-code type names (pos_int, bool, str, etc)
+LABEL = readable type names for output (positive integer, boolean, string, etc)
+'''
 
-OPTION_TYPES = {
+OPTION_TO_TAG = {
     'round': 'pos_int',
     'decimals': 'pos_int',
     'notify': 'bool',
@@ -70,7 +58,7 @@ OPTION_TYPES = {
     'overwrite_json': 'bool',
 }
 
-OPTION_TAG_NAME = {
+TAG_TO_LABEL = { # type codename -> readable name
     'pos_int': 'positive integer',
     'bool': 'boolean',
     'str': 'string',
@@ -79,11 +67,11 @@ OPTION_TAG_NAME = {
     'path': 'file path'
 }
 
-OPTION_TYPE_NAME = {}
-for name, _type in OPTION_TYPES.items():
-    OPTION_TYPE_NAME[name] = OPTION_TAG_NAME[_type]
+OPTION_TO_LABEL = {}
+for name, _type in OPTION_TO_TAG.items():
+    OPTION_TO_LABEL[name] = TAG_TO_LABEL[_type]
 
-OPTION_GROUPS = {
+OPTION_SECTION = {
     'quiet': 'output_to_terminal',
     'animation': 'output_to_terminal',
     'color': 'output_to_terminal',
@@ -91,6 +79,24 @@ OPTION_GROUPS = {
     'output_mode': 'output_to_file',
     'json': 'output_to_file',
     'overwrite_json': 'output_to_file',
+}
+
+DEFAULTS = {
+    'round': 5,
+    'decimals': 2,
+    'notify': False,
+    'encoding': 'utf-8',
+    'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36',
+    'http_proxy': None,
+    'https_proxy': None,
+    'timeout': 5.0,
+    'quiet': False,
+    'animation': False,
+    'color': False,
+    'output_file': DISABLED,
+    'output_mode': 'create',
+    'json': DISABLED,
+    'overwrite_json': False
 }
 
 FORCE_OUTPUT_ERROR = False
@@ -139,15 +145,15 @@ Legend: option name → where it's defined / wired / validated
 
 1. Declare     → src/constants.py → OPTIONS_LITERAL (literal type alias)
 2. Default val → src/constants.py → DEFAULTS dict
-3. Type        → src/constants.py → OPTION_TYPES dict   (maps name → type tag)
-4. Type label  → src/constants.py → OPTION_TAG_NAME dict (maps type tag → human string)
-5. Group       → src/constants.py → OPTION_GROUPS dict   (maps name → TOML section)
+3. Type        → src/constants.py → OPTION_TO_TAG dict   (maps name → type tag)
+4. Type label  → src/constants.py → TAG_TO_LABEL dict    (maps type tag → human string)
+5. Section       → src/constants.py → OPTION_SECTION dict  (maps name → TOML section)
 6. Sentinels   → src/constants.py → UNDEFINED, DISABLED
 
 7. Parsing / validation → src/validate.py  → Validate.validate(name, val)
 8. CLI argument         → src/cli.py       → Parser.__init__ (add_argument + type= via _get_validate_func)
-9. Wire to attrs        → src/main.py      → DirectVsProxy._assign(name, val, source)
-10. Layer 4 pipeline    → src/main.py      → DirectVsProxy.__init__ (default → auto → config → CLI)
+9. Wire to attrs        → src/main.py      → ProxyVsDirect._assign(name, val, source)
+10. Layer 4 pipeline    → src/main.py      → ProxyVsDirect.__init__ (default → auto → config → CLI)
 11. TOML CRUD           → src/config.py    → Config class (read / write / show_list)
 12. User docs           → README.md
 '''
