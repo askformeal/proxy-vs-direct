@@ -149,10 +149,13 @@ class Config:
             output(f'{name}: {self.invalid_options[name]}')
 
     def show_path(self):
-        if self.file_exists:
-            output(f'Configure file at {self.config_path}')
+        if self.skip:
+            output.error('Can not show configure file path because --config option is set to none or is invalid.')
         else:
-            output(f'Would have load configure file from {self.config_path} but it does not exist.')
+            if self.file_exists:
+                output(f'Configure file at {self.config_path}')
+            else:
+                output(f'Would have load configure file from {self.config_path} but it does not exist.')
 
     @require_valid_file('set option')
     def set_option(self, name, val):
