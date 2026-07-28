@@ -1,4 +1,5 @@
 import platformdirs
+from pathlib import Path
 import tomllib
 import tomli_w
 import os
@@ -25,8 +26,7 @@ def require_valid_file(action):
 
 class Config:
     def __init__(self):
-        self.config_dir = platformdirs.user_config_path(PLATFORM_DIR_NAME)
-        self.config_path = os.path.join(self.config_dir, CONFIG_FILE_NAME)
+        self._set_config_path(Path(platformdirs.user_config_path(PLATFORM_DIR_NAME)) / CONFIG_FILE_NAME)
         self.options = {}
         self.raw_config = {}
         self.option_source = {}
@@ -37,10 +37,25 @@ class Config:
             'cli': 'CLI argument',
             }
         self.invalid_options = {}
-        self.file_exists = os.path.exists(self.config_path)
         self.corrupted = False
+        self.skip = False
+
+    def _set_config_path(self, path):
+        try:
+            self.config_path = Path(path)
+        except TypeError:
+            output.warning(f'Invalid configure file path: {path}, loading skipped.')
+            self.config_dir = ''
+            self.filename = ''
+            self.skip = True
+            self.file_exists = False
+        else:
+            self.config_dir = self.config_path.parent
+            self.filename = self.config_path.name
+            self.file_exists = self.config_path.exists()
 
     def get_config(self) -> dict:
+        if not self.skip:
             if self.file_exists:
                 try:
                     with FilePrompter(self.config_path, 'rb', prefix=f'Failed to read configure file {self.config_path} because', level='warning') as f:
@@ -58,6 +73,9 @@ class Config:
             else:
                 output.info(f'Configure file {self.config_path} not found and will be skipped.')
                 return {}
+        else:
+            return {}
+            
 
     def _assign_option(self, name: OPTIONS_LITERAL, section=''):
         if section == '':
@@ -104,7 +122,7 @@ class Config:
 
             try:
                 with FilePrompter(self.config_path, 'wb', 
-                                prefix=f'Failed to write into {CONFIG_FILE_NAME} because', 
+                                prefix=f'Failed to write into {self.filename} because', 
                                 error_prompt={FileNotFoundError: f'{self.config_dir} does not exist. You can use config create subcommand to create one'}
                                 ) as f:
                     tomli_w.dump(content, f)
@@ -115,11 +133,11 @@ class Config:
 
     @require_valid_file('show option list')
     def show_list(self):
-        output(f'These following options are set in {CONFIG_FILE_NAME}:')
+        output(f'These following options are set in {self.filename}:')
         options = self._section_options(self.options)
         self._output_options(options, 1)
         if self.invalid_options != {}:
-            output(f'These following options are set in {CONFIG_FILE_NAME} but their values are not valid:')
+            output(f'These following options are set in {self.filename} but their values are not valid:')
             options = self._section_options(self.invalid_options)
             self._output_options(options, 1)
 
@@ -211,9 +229,10 @@ class Config:
             output(f'{GREEN}Configure file clean{RESET}')
 
     def create_file(self):
-        if not os.path.isdir(self.config_dir):
+        if not self.config_dir.is_dir():
             try:
-                os.makedirs(self.config_dir, exist_ok=True)
+                output.info(f'{self.config_dir} not found, creating...')
+                self.config_dir.mkdir(parents=True, exist_ok=True)
             except OSError as e:
                 output.error(f'Failed to create directory {self.config_dir} because ', end='')
                 if isinstance(e, FileExistsError):
@@ -234,9 +253,9 @@ class Config:
 
     def purge_file(self):
         try:
-            os.remove(self.config_path)
+            self.config_path.unlink()
         except OSError as e:
-            output.error(f'Failed to purge {CONFIG_FILE_NAME} because ', end='')
+            output.error(f'Failed to purge {self.filename} because ', end='')
             if isinstance(e, FileNotFoundError):
                 output('it does not exist', output_type='error')
             elif isinstance(e, PermissionError):

@@ -3,6 +3,7 @@ import io
 import sys
 import re
 from random import choice
+from pathlib import Path
 
 from src.constants import HELP_BANNER_NARROW, HELP_BANNER_WIDE 
 from src.constants import DIM, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET
@@ -68,7 +69,7 @@ class Output:
         
         else:
             if self.write_mode == 'create':
-                if os.path.exists(self.path):   
+                if Path(self.path).exists():
                     self.__call__(f'{WARNING} Output mode is set to "create" but {self.path} already exists, and outputs to file will be disabled. '
                                 f'You can use --output-mode overwrite to overwrite this file or use "append" output mode to append to the end of this file.',
                                 skip_file=True)

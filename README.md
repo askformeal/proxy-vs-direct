@@ -21,6 +21,8 @@ python -m src <url>                                       # 'pk' is assumed when
 | `--color, --no-color` | Enable/disable ANSI colors | auto (TTY) |
 | `--show-source, --no-show-source` | Show from which source each option is loaded | off |
 | `--show-value, --no-show-value` | Show the value of each option | off |
+| `--freeze-args, --no-freeze-args` | Freeze CLI arguments to config file | off |
+| `--config PATH` | Path to a specific config file (use `none` to skip loading) | default path |
 | `--output-file PATH` | Write output to a file | disabled |
 | `--output-mode MODE` | File write mode: `create` / `overwrite` / `append` | `create` |
 
@@ -81,6 +83,7 @@ usage: proxy-vs-direct [--encoding ENCODING] [--quiet | --no-quiet]
                        [--animation | --no-animation] [--color | --no-color]
                        [--show-source | --no-show-source]
                        [--show-value | --no-show-value]
+                       [--freeze-args | --no-freeze-args] [--config CONFIG]
                        [--output-file OUTPUT_FILE]
                        [--output-mode {default,create,overwrite,append}]
                        {pk,config} ...
@@ -89,9 +92,9 @@ Proxy vs Direct 0.6.0 - Make your proxy and direct connection PK on latency to a
 
 positional arguments:
   {pk,config}
-    pk         Start Proxy vs Direct PK to a given URL. This subcommand will
-               be used if none is given
-    config     Edit and examine configure file
+    pk                  Start Proxy vs Direct PK to a given URL. This
+                        subcommand will be used if none is given
+    config              Edit and examine configure file
 
 options:
   --encoding ENCODING   File encoding for output (default: utf-8)
@@ -105,6 +108,11 @@ Output to Terminal:
                         Show from which source each option is loaded
   --show-value, --no-show-value
                         Show the value of each option
+  --freeze-args, --no-freeze-args
+                        Freeze all given CLI arguments except --freeze-args to
+                        configure file. Existing option may be overwrote
+  --config CONFIG       The path of a specific configure file to load. Set to
+                        "none" to skip loading configure file
 
 Output to File:
   --output-file OUTPUT_FILE
@@ -131,6 +139,7 @@ usage: proxy-vs-direct pk [--encoding ENCODING] [--quiet | --no-quiet]
                           [--color | --no-color]
                           [--show-source | --no-show-source]
                           [--show-value | --no-show-value]
+                          [--freeze-args | --no-freeze-args] [--config CONFIG]
                           [--output-file OUTPUT_FILE]
                           [--output-mode {default,create,overwrite,append}]
                           [-r ROUND] [-d DECIMALS] [--rules]
@@ -169,6 +178,11 @@ Output to Terminal:
                         Show from which source each option is loaded
   --show-value, --no-show-value
                         Show the value of each option
+  --freeze-args, --no-freeze-args
+                        Freeze all given CLI arguments except --freeze-args to
+                        configure file. Existing option may be overwrote
+  --config CONFIG       The path of a specific configure file to load. Set to
+                        "none" to skip loading configure file
 
 Output to File:
   --output-file OUTPUT_FILE
@@ -194,7 +208,8 @@ usage: proxy-vs-direct config [--encoding ENCODING] [--quiet | --no-quiet]
                               [--color | --no-color]
                               [--show-source | --no-show-source]
                               [--show-value | --no-show-value]
-                              [--output-file OUTPUT_FILE]
+                              [--freeze-args | --no-freeze-args]
+                              [--config CONFIG] [--output-file OUTPUT_FILE]
                               [--output-mode {default,create,overwrite,append}]
                               [-h]
                               {list,show,where,open,set,unset,clean,create,purge} ...
@@ -228,6 +243,11 @@ Output to Terminal:
                         Show from which source each option is loaded
   --show-value, --no-show-value
                         Show the value of each option
+  --freeze-args, --no-freeze-args
+                        Freeze all given CLI arguments except --freeze-args to
+                        configure file. Existing option may be overwrote
+  --config CONFIG       The path of a specific configure file to load. Set to
+                        "none" to skip loading configure file
 
 Output to File:
   --output-file OUTPUT_FILE

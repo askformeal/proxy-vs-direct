@@ -28,7 +28,7 @@
   - [X] `create` — create an empty configure file if none exists
   - [X] `purge` — delete the configure file
 - [X] Add `--show-source` option
-- [ ] Add `--freeze-options` option
+- [X] Add `--freeze-options` option
 - [ ] Add `--config` option to specify configure file (set to "none" to skip loading configure file)
 - [ ] Add customizable connect and read timeout
 - [ ] Add progress bar

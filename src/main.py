@@ -1,4 +1,4 @@
-import os
+from pathlib import Path
 
 from src import __version__
 import urllib.request
@@ -26,7 +26,6 @@ class ProxyVsDirect:
         self.encoding = None
         self.animation = None
         self.json = None
-        self.overwrite_json = None
         self.show_source = None
         self.show_value = None
         self.freeze = None
@@ -39,6 +38,12 @@ class ProxyVsDirect:
         self.contest.plot = self.plot
         args = self.parser.get_args()
         self.config = Config()
+
+        if args.config == 'none':
+            self.config.skip = True
+        elif args.config is not UNDEFINED:
+            self.config._set_config_path(args.config)
+
         sys_proxies = urllib.request.getproxies()
         sys_http_proxy = sys_proxies.get('http', None)
         sys_https_proxy = sys_proxies.get('https', None) 
@@ -60,7 +65,7 @@ class ProxyVsDirect:
 
         # Layer 3: Configure file
         config = self.config.get_config()
-
+        
         for name, val in config.items():
             self._assign(name, val, 'config')
 
@@ -129,7 +134,7 @@ class ProxyVsDirect:
                 self.plot.show_pk_result(results)
 
                 if self.json != DISABLED:
-                    if os.path.exists(self.json) and not self.overwrite_json:
+                    if Path(self.json).exists() and not self.overwrite_json:
                         output.warning(f'Failed to write into {self.json} because it already exists. You can use --overwrite-json option to overwrite this file.')
                     else:
                         try:

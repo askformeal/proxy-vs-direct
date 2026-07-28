@@ -5,6 +5,15 @@ All notable changes to proxy-vs-direct will be documented here.
 ## [Unreleased]
 
 ### Added
+- `--config PATH` option: specify a custom config file path (use `--config none` to skip loading)
+- `--freeze-args, --no-freeze-args` option: freeze CLI arguments to config file
+- `Config._set_config_path()`: extracted path assignment logic with validation
+- `Config.skip` flag: skip config loading when set
+
+### Changed
+- `Config` uses `self.filename` and `self.config_dir` instead of hardcoded `CONFIG_FILE_NAME` and inline path construction
+- `Config.file_exists` moved into `_set_config_path()` to stay in sync with custom paths
+- `Config.create_file()` now shows an info message before creating the config directory
 - `config set <option> <value>`: set an option's value in config file
 - `config unset <option>`: delete an option from config file
 - `config clean`: remove invalid and undefined options from config file
