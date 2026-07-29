@@ -123,7 +123,7 @@ class Output:
             if not self.color:
                 text = strip_ansi(text)
 
-            if not self.quiet or force or type_force_output_filter[output_type] or self.force_notify:
+            if not self.quiet or force or type_force_output_filter[output_type] or (self.force_notify and output_type != 'normal'):
                 sys.stdout.write(text)
         else:
             buffered_args = (args, {'force': force, 'skip_file': skip_file, 'prefix': prefix, 'output_type': output_type, **kwargs})
