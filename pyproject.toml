@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "proxy-vs-direct"
+version = "0.6.0"
+description = "Compare proxy vs direct HTTP latency"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+dependencies = [
+    "platformdirs",
+    "plyer",
+    "pyfiglet",
+    "requests",
+    "tomli_w",
+]
+
+[project.urls]
+Homepage = "https://github.com/askformeal/proxy-vs-direct"
+
+[project.scripts]
+pvd = "src.main:main"
+
+[tool.setuptools]
+packages = ["src"]

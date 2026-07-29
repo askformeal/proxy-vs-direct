@@ -1,5 +1,4 @@
-from src.main import ProxyVsDirect
+from src.main import main
 
 if __name__ == '__main__':
-    app = ProxyVsDirect()
-    app.run()
+    main()

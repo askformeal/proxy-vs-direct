@@ -251,3 +251,9 @@ class ProxyVsDirect:
 
         self.option_source[name] = source
         self.option_value[name] = val
+
+
+def main():
+    """Entry point for pip-installed `pvd` command."""
+    app = ProxyVsDirect()
+    app.run()
