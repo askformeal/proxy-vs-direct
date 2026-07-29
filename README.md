@@ -2,13 +2,39 @@
 
 Compare the latency to a certain URL between proxy and direct connection.
 
+## Installation
+
+```bash
+pip install proxy-vs-direct
+```
+
+Or clone and install locally:
+
+```bash
+git clone https://github.com/askformeal/proxy-vs-direct.git
+cd proxy-vs-direct
+pip install .
+```
+
+After installation, use the `pvd` command:
+
+```bash
+pvd --help
+```
+
+Or run directly from source:
+
+```bash
+python -m src --help
+```
+
 ## Usage
 
 ```bash
-python -m src -h                                          # Global help
-python -m src pk [url] -r 10 -t 3                         # Run PK (default subcommand)
-python -m src config list                                 # List config file contents
-python -m src <url>                                       # 'pk' is assumed when no subcommand
+pvd -h                                                # Global help
+pvd pk [url] -r 10 -t 3                               # Run PK (default subcommand)
+pvd config list                                       # List config file contents
+pvd <url>                                             # 'pk' is assumed when no subcommand
 ```
 
 ### Global Options
@@ -17,7 +43,7 @@ python -m src <url>                                       # 'pk' is assumed when
 |--------|-------------|---------|
 | `--encoding ENCODING` | File encoding for output | `utf-8` |
 | `--quiet, --no-quiet` | Enable/disable terminal output | auto (TTY) |
-| `--animation, --no-animation` | Enable/disable real-time round status animation | auto (TTY) |
+| `--animation, --no-animation` | Enable/disable real-time round status animation (includes progress bar) | auto (TTY) |
 | `--color, --no-color` | Enable/disable ANSI colors | auto (TTY) |
 | `--show-source, --no-show-source` | Show from which source each option is loaded | off |
 | `--show-value, --no-show-value` | Show the value of each option | off |
@@ -32,7 +58,9 @@ python -m src <url>                                       # 'pk' is assumed when
 |----------|-------------|---------|
 | `url` | Target URL to test (auto-adds `https://` if scheme missing) | required |
 | `-r, --round` | Number of rounds to PK | 5 |
-| `-t, --timeout` | Timeout in seconds (Note: split between connect and read timeout) | 5.0 |
+| `-t, --timeout` | Overall timeout in seconds (shared between connect and read) | 5.0 |
+| `--con-timeout` | Connect timeout in seconds. Prioritized over `--timeout` | disabled |
+| `--read-timeout` | Read timeout in seconds. Prioritized over `--timeout` | disabled |
 | `-d, --decimals` | Number of digits to round | 2 |
 | `--rules` | Show PK rules | — |
 | `--user-agent` | Custom User-Agent header | Chrome 137 |
@@ -47,37 +75,38 @@ python -m src <url>                                       # 'pk' is assumed when
 
 | Command | Description |
 |---------|-------------|
-| `python -m src config list` | List options from config file, grouped by TOML section |
-| `python -m src config show <option>` | Show value of a specific option |
-| `python -m src config set <option> <value>` | Set an option's value in config file |
-| `python -m src config unset <option>` | Delete an option from config file |
-| `python -m src config where` | Show the path of the config file |
-| `python -m src config open` | Open config file with system default app |
-| `python -m src config clean` | Remove invalid and undefined options |
-| `python -m src config create` | Create an empty config file |
-| `python -m src config purge` | Delete the config file |
+| `pvd config list` | List options from config file, grouped by TOML section |
+| `pvd config show <option>` | Show value of a specific option |
+| `pvd config set <option> <value>` | Set an option's value in config file |
+| `pvd config unset <option>` | Delete an option from config file |
+| `pvd config where` | Show the path of the config file |
+| `pvd config open` | Open config file with system default app |
+| `pvd config clean` | Remove invalid and undefined options |
+| `pvd config create` | Create an empty config file |
+| `pvd config purge` | Delete the config file |
 
 Invalid values in the config file are reported separately with a description of why they failed validation.
 
 ### Examples
 
 ```bash
-python -m src https://www.google.com -r 10 -t 3
-python -m src google.com -r 5
-python -m src https://www.google.com --http-proxy http://127.0.0.1:7897 --https-proxy http://127.0.0.1:7897
-python -m src https://www.google.com --quiet --output-file result.txt
-python -m src https://www.google.com -j result.json
-python -m src config list
-python -m src config show round
-python -m src config set round 15
-python -m src config where
+pvd https://www.google.com -r 10 -t 3
+pvd google.com -r 5
+pvd https://www.google.com --http-proxy http://127.0.0.1:7897 --https-proxy http://127.0.0.1:7897
+pvd https://www.google.com --quiet --output-file result.txt
+pvd https://www.google.com -j result.json
+pvd config list
+pvd config show round
+pvd config set round 15
+pvd config where
 ```
 
 ## Screenshots
 
 ### Help
 
-Global help (`python -m src -h`):
+Global help (`pvd -h`):
+
 ```
 usage: proxy-vs-direct [--encoding ENCODING] [--quiet | --no-quiet]
                        [--animation | --no-animation] [--color | --no-color]
@@ -88,7 +117,8 @@ usage: proxy-vs-direct [--encoding ENCODING] [--quiet | --no-quiet]
                        [--output-mode {default,create,overwrite,append}]
                        {pk,config} ...
 
-Proxy vs Direct 0.6.0 - Make your proxy and direct connection PK on latency to a certain URL.
+Proxy vs Direct 0.6.1 - Make your proxy and direct connection PK on latency to
+a certain URL.
 
 positional arguments:
   {pk,config}
@@ -102,7 +132,8 @@ options:
 Output to Terminal:
   --quiet, --no-quiet   Enable/disable terminal outputs
   --animation, --no-animation
-                        Enable/disable animations for better compatibility
+                        Enable/disable animations (includes progress bar) for
+                        better compatibility
   --color, --no-color   Enable/disable colors for better compatibility
   --show-source, --no-show-source
                         Show from which source each option is loaded
@@ -128,11 +159,12 @@ If you encounter a problem or want to give a suggestion, please send a feedback 
   Send an E-Mail to muzhi1014@outlook.com
 
 Examples:
-  python -m src https://example.com -r 10
-  python -m src https://example.com --rules
+  pvd https://example.com -r 10
+  pvd https://example.com --rules
 ```
 
-PK subcommand help (`python -m src pk -h`):
+PK subcommand help (`pvd pk -h`):
+
 ```
 usage: proxy-vs-direct pk [--encoding ENCODING] [--quiet | --no-quiet]
                           [--animation | --no-animation]
@@ -144,9 +176,11 @@ usage: proxy-vs-direct pk [--encoding ENCODING] [--quiet | --no-quiet]
                           [--output-mode {default,create,overwrite,append}]
                           [-r ROUND] [-d DECIMALS] [--rules]
                           [-n | --notify | --no-notify] [-j JSON]
-                          [--overwrite-json | --no-overwrite-json] [-h] [-v]
+                          [--overwrite-json | --no-overwrite-json]
                           [--user-agent USER_AGENT] [--http-proxy HTTP_PROXY]
                           [--https-proxy HTTPS_PROXY] [-t TIMEOUT]
+                          [--con-timeout CON_TIMEOUT]
+                          [--read-timeout READ_TIMEOUT] [-h] [-v]
                           [url]
 
 Start Proxy vs Direct PK to a given URL. This subcommand will be used if none
@@ -172,7 +206,8 @@ options:
 Output to Terminal:
   --quiet, --no-quiet   Enable/disable terminal outputs
   --animation, --no-animation
-                        Enable/disable animations for better compatibility
+                        Enable/disable animations (includes progress bar) for
+                        better compatibility
   --color, --no-color   Enable/disable colors for better compatibility
   --show-source, --no-show-source
                         Show from which source each option is loaded
@@ -198,9 +233,14 @@ Request:
   --https-proxy HTTPS_PROXY
                         HTTPS proxy to use. Use system proxy by default
   -t, --timeout TIMEOUT
-                        Timeout in seconds
+                        Overall timeout in seconds
+  --con-timeout CON_TIMEOUT
+                        Connect timeout in seconds. Prioritized over --timeout
+  --read-timeout READ_TIMEOUT
+                        Read timeout in seconds. Prioritized over --timeout
 ```
-Here's the config help (`python -m src config -h`):
+
+Here's the config help (`pvd config -h`):
 
 ```
 usage: proxy-vs-direct config [--encoding ENCODING] [--quiet | --no-quiet]
@@ -237,7 +277,8 @@ options:
 Output to Terminal:
   --quiet, --no-quiet   Enable/disable terminal outputs
   --animation, --no-animation
-                        Enable/disable animations for better compatibility
+                        Enable/disable animations (includes progress bar) for
+                        better compatibility
   --color, --no-color   Enable/disable colors for better compatibility
   --show-source, --no-show-source
                         Show from which source each option is loaded
@@ -257,10 +298,11 @@ Output to File:
 ```
 
 ### PK Result
+
 ```
-────────────────────────────────────────────────────
-  PROXY vs DIRECT: 3 request(s) each, 3.0s timeout
-────────────────────────────────────────────────────
+───────────────────────────────────────────────────────────────────────────────
+  PROXY vs DIRECT: 3 request(s) each, 3.0s connect timeout, 6.0s read timeout
+───────────────────────────────────────────────────────────────────────────────
 
 Round [1/3] waiting...
   Proxy: 1737.93ms, Code 200 | Direct: Failed, Connection Timeout
@@ -275,13 +317,14 @@ Round [3/3] waiting...
 ──────────────────────────────────────────────────
   PK Result 2026-07-23 13:48:16
 ──────────────────────────────────────────────────
-  Rounds:     [3/3] completed
-  URL:        https://www.google.com
-  HTTP Proxy: http://127.0.0.1:7897
-  HTTPS Proxy:http://127.0.0.1:7897
-  Timeout:    3.0s
-  Precision:  2 decimal place(s)
-  Duration:   18.18s
+  Rounds:          [3/3] completed
+  URL:             https://www.google.com
+  HTTP Proxy:      http://127.0.0.1:7897
+  HTTPS Proxy:     http://127.0.0.1:7897
+  Connect Timeout: 3.0s
+  Read Timeout:    6.0s
+  Precision:       2 decimal place(s)
+  Duration:        18.18s
 
   Proxy
     Score:   3
@@ -299,6 +342,7 @@ Round [3/3] waiting...
 ```
 
 ### PK Rules
+
 ```
 PK Rules:
   1. Each round, Proxy and Direct send one request to the same URL simultaneously.
@@ -308,12 +352,16 @@ PK Rules:
   5. Final score = rounds won. Higher score wins the PK.
 ```
 
-## Setup
+## Setup (from source)
 
 ```bash
-python -m venv .venv
-source .venv/Scripts/activate  # Windows: .venv\Scripts\activate
+git clone https://github.com/askformeal/proxy-vs-direct.git
+cd proxy-vs-direct
+python -m venv venv
+source venv/Scripts/activate  # Windows
+# source venv/bin/activate    # Linux/macOS
 pip install -r requirements.txt
+pip install -e .              # Install pvd command
 ```
 
 ## Config File
@@ -322,7 +370,7 @@ proxy-vs-direct supports a TOML config file at your platform's config directory 
 
 Configuration priority (highest to lowest): CLI arguments > config file > auto-detection > hardcoded defaults.
 
-Use `python -m src config list` to view the current config, `config set <option> <value>` to modify it, and `config where` to find the file. Use `config clean` to remove invalid or undefined entries, `config create` to bootstrap an empty config, and `config purge` to delete it entirely.
+Use `pvd config list` to view the current config, `config set <option> <value>` to modify it, and `config where` to find the file. Use `config clean` to remove invalid or undefined entries, `config create` to bootstrap an empty config, and `config purge` to delete it entirely.
 
 A sample config file (`config.example.toml`) is included in the repository.
 
