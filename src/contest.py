@@ -1,10 +1,12 @@
+import os
 from statistics import mean, StatisticsError
 from threading import Thread
 import time
 from datetime import datetime
 import requests
 
-from src.constants import PK_REFRESH_INTERVAL, DISABLED
+from src.constants import PK_REFRESH_INTERVAL, MIN_BAR_WIDTH, BAR_PAD_WIDTH, BAR_COMPLETED, BAR_BLANK, BAR_DECIMALS, DISABLED
+from src.constants import GREEN, WHITE, RESET
 from src.output import output
 
 class Contest:
@@ -33,6 +35,7 @@ class Contest:
 
     def pk(self):
         self.set_timeout()
+        show_progress_bar = True
         results = {
             'url': self.url,
             'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
@@ -89,11 +92,35 @@ class Contest:
                 round_start_time = time.time()
                 while True:
                     if self.animation:
+                        del_lines = 1
                         self.plot.print_round_info(self.round_status, start_time=round_start_time)
+                        if show_progress_bar:
+                            try:
+                                terminal_width = os.get_terminal_size()[0]
+                            except OSError:
+                                output.warning('Failed to get terminal width, and progress bar will be disabled.')
+                                show_progress_bar = False
+                            else:
+                                if terminal_width >= MIN_BAR_WIDTH + (BAR_PAD_WIDTH * 2):
+                                    del_lines = 3
+
+                                    ratio = results['completed']/results['total']
+                                    percent = f' {ratio*100:6.1f}%'
+
+                                    bar_width = terminal_width - (BAR_PAD_WIDTH * 2) - len(percent)
+                                    completed_width = int(round(bar_width * ratio))
+                                    blank_width = bar_width - completed_width
+                                    completed = BAR_COMPLETED * completed_width
+                                    blank = BAR_BLANK * blank_width
+                                    pad = ' ' * BAR_PAD_WIDTH
+                                    output(f'\n{pad}{GREEN}{completed}{WHITE}{blank}{RESET}{percent}{pad}')
+
                         time.sleep(PK_REFRESH_INTERVAL)
-                        output('\033[F\033[K', end='', skip_file=True) # Delete last line
+                        for j in range(del_lines):
+                            output('\033[F\033[K', end='', skip_file=True) # Delete last line
                     else:
                         time.sleep(PK_REFRESH_INTERVAL)
+
                     if self.round_status['proxy'] is not None and self.round_status['direct'] is not None:
                         break
                 results['completed'] += 1

@@ -92,6 +92,7 @@ class Output:
             else:
                 banner = ''
         except OSError:
+            output.warning('Failed to get terminal width, and will use narrow help message banner.')
             banner = HELP_BANNER_NARROW
         banner_color = choice((RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE))
         message = f'\n{banner_color}{banner}{RESET}{message}'
