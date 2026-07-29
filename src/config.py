@@ -269,9 +269,9 @@ class Config:
                 else:
                     output(f'\"{e}\".', output_type='error')
                 return
-        else:
-            if self._apply_to_file(content={}):
-                output(f'Created empty configure file at {self.config_path}')
+        
+        if self._apply_to_file(content={}):
+            output(f'Created empty configure file at {self.config_path}')
 
     @guardian('purge file', exists=True)
     def purge_file(self):
@@ -316,4 +316,4 @@ class Config:
                         self.set_option(name, values[name], apply=False)
                         count += 1
             if self._apply_to_file():
-                output(f'Successfully freezed {count} option(s) to configure file.')
+                output(f'Successfully froze {count} option(s) to configure file.')
