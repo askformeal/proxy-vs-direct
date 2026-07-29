@@ -76,7 +76,6 @@ class ProxyVsDirect:
             if val is not UNDEFINED:
                 self._assign(name, val, 'cli')
 
-        output.flush()
         self.config.option_source = self.option_source
 
         self.command = args.command

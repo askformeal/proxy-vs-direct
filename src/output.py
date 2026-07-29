@@ -34,9 +34,6 @@ class Output:
             if val is not None:
                 setattr(self, name, val)
 
-        if None not in (self.quiet, self.path, self.write_mode, self.encoding, self.color):
-            self.flush()
-
     def flush(self):
         if not self.ready:
             self.ready = True
