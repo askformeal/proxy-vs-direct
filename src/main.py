@@ -26,6 +26,7 @@ class ProxyVsDirect:
         self.encoding = None
         self.animation = None
         self.json = None
+        self.overwrite_json = None
         self.show_source = None
         self.show_value = None
         self.freeze = None
@@ -213,13 +214,52 @@ class ProxyVsDirect:
                 output.help(self.parser.config_help_msg)
     
     def _assign(self, name: OPTIONS_LITERAL, val, source: Literal['default', 'auto', 'config', 'cli']):
-        if name == 'round':
-            self.contest.round = val
-        elif name == 'decimals':
-            self.contest.decimals = val
-            self.plot.decimals = val
-        elif name == 'notify':
-            self.notify = val
+        quick_assign = {
+            'round': {
+                self.contest: 'round' # means self.contest.round = val
+            },
+            'decimals': {
+                self.contest: 'decimals',
+                self.plot: 'decimals'
+            },
+            'notify': {
+                self: 'notify'
+            },
+            'timeout': {
+                self.contest: 'overall_timeout'
+            },
+            'con_timeout': {
+                self.contest: 'con_timeout'
+            },
+            'read_timeout': {
+                self.contest: 'read_timeout'
+            },
+            'animation': {
+                self: 'animation',
+                self.contest: 'animation'
+            },
+            'json': {
+                self: 'json'
+            },
+            'overwrite_json': {
+                self: 'overwrite_json'
+            },
+            'show_source': {
+                self: 'show_source'
+            },
+            'show_value': {
+                self: 'show_value'
+            },
+            'freeze_args': {
+                self: 'freeze'
+            }
+        }
+
+        containers = quick_assign.get(name, None)
+        if containers is not None:
+            for instance, attr in containers.items():
+                setattr(instance, attr, val)
+
         elif name == 'encoding':
             self.encoding = val
             output.set_attr(encoding=val)
@@ -229,33 +269,14 @@ class ProxyVsDirect:
             self.contest.proxies['http'] = val
         elif name == 'https_proxy':
             self.contest.proxies['https'] = val
-        elif name == 'timeout':
-            self.contest.overall_timeout = val
-        elif name == 'con_timeout':
-            self.contest.con_timeout = val
-        elif name == 'read_timeout':
-            self.contest.read_timeout = val
         elif name =='quiet':
             output.set_attr(quiet=val)
-        elif name == 'animation':
-            self.animation = val
-            self.contest.animation = val
         elif name =='color':
             output.set_attr(color=val)
         elif name == 'output_file':
             output.set_attr(path=val)
         elif name == 'output_mode':
             output.set_attr(write_mode=val)
-        elif name == 'json':
-            self.json = val
-        elif name == 'overwrite_json':
-            self.overwrite_json = val
-        elif name == 'show_source':
-            self.show_source = val
-        elif name == 'show_value':
-            self.show_value = val
-        elif name == 'freeze_args':
-            self.freeze = val
 
         self.option_source[name] = source
         self.option_value[name] = val
