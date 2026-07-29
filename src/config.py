@@ -14,15 +14,38 @@ from src.validate import validate
 from src.output import output
 from src.file_prompt import FilePrompter
 
-def require_valid_file(action):
+def guardian(action, non_skip=True, exists=False, non_exists=False, valid=False):
     def decorator(func):
         def wrapper(*args, **kwargs):
-            if args[0].corrupted:
+            self: Config = args[0]
+            if self.skip and non_skip:
+                output.error(f'Can not {action} because --config option is set to none or an invalid value, and the loading of configure file had been skipped.')
+            elif not self.file_exists and exists:
+                output.error(f'Can not {action} because configure file does not exist at {self.config_path}.')
+            elif self.file_exists and non_exists:
+                output.error(f'Can not {action} because configure file already exists at {self.config_path}.')
+            elif self.corrupted and valid:
                 output.error(f'Can not {action} because configure file is corrupted.')
             else:
                 return func(*args, **kwargs)
         return wrapper
     return decorator
+
+'''
+What does each method requires:
+
+show_list: not skip, file exists, file valid
+show_option: not skip, file exists, file valid
+show_path: not skip
+set_option: not skip, file valid
+unset_option: not skip, file exists, file valid
+clean_file: not skip, file exists, file valid
+create_file: not skip, file not exists
+purge_file: not skip, file exists
+open_file: not skip, file exists
+freeze: not skip, file valid
+'''
+
 
 class Config:
     def __init__(self):
@@ -131,7 +154,7 @@ class Config:
             else:
                 return True
 
-    @require_valid_file('show option list')
+    @guardian('show option list', exists=True, valid=True)
     def show_list(self):
         output(f'These following options are set in {self.filename}:')
         options = self._section_options(self.options)
@@ -141,24 +164,22 @@ class Config:
             options = self._section_options(self.invalid_options)
             self._output_options(options, 1)
 
-    @require_valid_file('show option')
+    @guardian('show option', exists=True, valid=True)
     def show_option(self, name):
         if name in self.options:
             output(f'{name}: {self.options[name]}')
         elif name in self.invalid_options:
-            output(f'{name}: {self.invalid_options[name]}')
+            output(f'{name}: {self.invalid_options[name]} (invalid)')
 
+    @guardian('show configure file path')
     def show_path(self):
-        if self.skip:
-            output.error('Can not show configure file path because --config option is set to none or is invalid.')
+        if self.file_exists:
+            output(f'Configure file at {self.config_path}')
         else:
-            if self.file_exists:
-                output(f'Configure file at {self.config_path}')
-            else:
-                output(f'Would have load configure file from {self.config_path} but it does not exist.')
+            output(f'Would have load configure file from {self.config_path} but it does not exist.')
 
-    @require_valid_file('set option')
-    def set_option(self, name, val):
+    @guardian('set option', valid=True)
+    def set_option(self, name, val, apply=True):
         valid_val = validate(name, val)
         if valid_val is None:
             output.error(f'\"{val}\" is not a valid {OPTION_TO_LABEL[name]}')
@@ -174,11 +195,11 @@ class Config:
                 else:
                     # section does not exists
                     self.raw_config[section] = {name: valid_val}
-           
-            if self._apply_to_file():
+
+            if apply and self._apply_to_file():
                 output(f'{GREEN}Successfully set {name} to {valid_val}.{RESET}')
 
-    @require_valid_file('delete option')
+    @guardian('delete option', exists=True, valid=True)
     def unset_option(self, name, apply=True):
         section = OPTION_SECTION.get(name, None)
         if section is None:
@@ -198,7 +219,7 @@ class Config:
         else:
             output.error(f'Failed to delete {name} because it does not exist in the configure file.')
 
-    @require_valid_file('clean file')
+    @guardian('clean file', exists=True, valid=True)
     def clean_file(self):
         save = False
         if len(self.invalid_options) > 0:
@@ -231,6 +252,7 @@ class Config:
         else:
             output(f'{GREEN}Configure file clean{RESET}')
 
+    @guardian('create file', non_exists=True)
     def create_file(self):
         if not self.config_dir.is_dir():
             try:
@@ -247,13 +269,11 @@ class Config:
                 else:
                     output(f'\"{e}\".', output_type='error')
                 return
-            
-        if self.file_exists:
-            output.error(f'Can not create {self.config_path} because it already exists')
         else:
             if self._apply_to_file(content={}):
                 output(f'Created empty configure file at {self.config_path}')
 
+    @guardian('purge file', exists=True)
     def purge_file(self):
         try:
             self.config_path.unlink()
@@ -268,7 +288,7 @@ class Config:
         else:
             output(f'{GREEN}Successfully purged {self.config_path}.{RESET}')
             
-
+    @guardian('open file', exists=True)
     def open_file(self):
         if self.file_exists:
             output(f'Opening {self.config_path} with your system\'s default application...')
@@ -284,12 +304,16 @@ class Config:
         else:
             output.error(f'Can not open configure file because none exists.')
 
-    @require_valid_file('freeze arguments')
+    @guardian('freeze arguments', valid=True)
     def freeze(self, values: dict, sources: dict):
         if not self.file_exists:
             output.warning('Can not freeze arguments because no configure file exists.')
         else:
+            count = 0
             for name in OPTIONS:
                 if name != 'freeze_args': # easy to accidentally trigger unwanted freezes if write into file with other options
                     if sources[name] == 'cli':
-                        self.set_option(name, values[name])
+                        self.set_option(name, values[name], apply=False)
+                        count += 1
+            if self._apply_to_file():
+                output(f'Successfully freezed {count} option(s) to configure file.')
