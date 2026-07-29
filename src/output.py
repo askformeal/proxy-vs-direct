@@ -8,7 +8,6 @@ from pathlib import Path
 from src.constants import HELP_BANNER_NARROW, HELP_BANNER_WIDE 
 from src.constants import DIM, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, RESET
 from src.constants import ERROR, WARNING, INFO
-from src.constants import FORCE_OUTPUT_ERROR, FORCE_OUTPUT_WARNING, FORCE_OUTPUT_INFO
 from src.constants import DISABLED
 
 
@@ -24,6 +23,10 @@ class Output:
         self.write_mode = None
         self.encoding = None
         self.color = None
+        self.force_error = None
+        self.force_warning = None
+        self.force_info = None
+        self.force_notify = None
 
         self.file_ready = False
         self.ready = False
@@ -104,9 +107,9 @@ class Output:
         if self.ready:
             type_force_output_filter = {
                 'normal': False,
-                'error': FORCE_OUTPUT_ERROR,
-                'warning': FORCE_OUTPUT_WARNING,
-                'info': FORCE_OUTPUT_INFO
+                'error': self.force_error,
+                'warning': self.force_warning,
+                'info': self.force_info
             }
 
             buffer = io.StringIO()
@@ -120,7 +123,7 @@ class Output:
             if not self.color:
                 text = strip_ansi(text)
 
-            if not self.quiet or force or type_force_output_filter[output_type]:
+            if not self.quiet or force or type_force_output_filter[output_type] or self.force_notify:
                 sys.stdout.write(text)
         else:
             buffered_args = (args, {'force': force, 'skip_file': skip_file, 'prefix': prefix, 'output_type': output_type, **kwargs})

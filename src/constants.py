@@ -30,6 +30,10 @@ OPTIONS_LITERAL = Literal[
     'color',
     'output_file',
     'output_mode',
+    'force_error',
+    'force_warning',
+    'force_info',
+    'force_notify',
     'json',
     'overwrite_json',
     'show_source',
@@ -63,6 +67,10 @@ OPTION_TO_TAG = {
     'color': 'bool',
     'output_file': 'path',
     'output_mode': 'output_mode',
+    'force_error': 'bool',
+    'force_warning': 'bool',
+    'force_info': 'bool',
+    'force_notify': 'bool',
     'json': 'path',
     'overwrite_json': 'bool',
     'show_source': 'bool',
@@ -90,6 +98,10 @@ OPTION_SECTION = {
     'color': 'output_to_terminal',
     'output_file': 'output_to_file',
     'output_mode': 'output_to_file',
+    'force_error': 'output_to_terminal',
+    'force_warning': 'output_to_terminal',
+    'force_info': 'output_to_terminal',
+    'force_notify': 'output_to_terminal',
     'json': 'output_to_file',
     'overwrite_json': 'output_to_file',
 }
@@ -110,17 +122,16 @@ DEFAULTS = {
     'color': False,
     'output_file': DISABLED,
     'output_mode': 'create',
+    'force_error': False,
+    'force_warning': False,
+    'force_info': False,
+    'force_notify': False,
     'json': DISABLED,
     'overwrite_json': False,
     'show_source': False,
     'show_value': False,
     'freeze_args': False,
 }
-
-FORCE_OUTPUT_ERROR = False
-FORCE_OUTPUT_WARNING = False
-FORCE_OUTPUT_INFO = False
-
 
 # ANSI color helpers
 RESET    = '\033[0m'

@@ -277,6 +277,14 @@ class ProxyVsDirect:
             output.set_attr(path=val)
         elif name == 'output_mode':
             output.set_attr(write_mode=val)
+        elif name == 'force_error':
+            output.set_attr(force_error=val)
+        elif name == 'force_warning':
+            output.set_attr(force_warning=val)
+        elif name == 'force_info':
+            output.set_attr(force_info=val)
+        elif name == 'force_notify':
+            output.set_attr(force_notify=val)
 
         self.option_source[name] = source
         self.option_value[name] = val

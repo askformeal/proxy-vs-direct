@@ -70,15 +70,19 @@ class Parser(argparse.ArgumentParser):
             # ----- public parser -----
             self.public_parser = argparse.ArgumentParser(add_help=False)
             self.public_parser.add_argument('--encoding', default=UNDEFINED, help='File encoding for output (default: utf-8)')
+            self.public_parser.add_argument('--config', default=UNDEFINED, help='The path of a specific configure file to load. Set to "none" to skip loading configure file') # Special argument, don't go in the 4 layer loading.
+            self.public_parser.add_argument('--show-source', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Show from which source each option is loaded')
+            self.public_parser.add_argument('--show-value', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Show the value of each option')
+            self.public_parser.add_argument('--freeze-args', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Freeze all given CLI arguments except --freeze-args to configure file. Existing option may be overwrote')
 
             group_terminal = self.public_parser.add_argument_group('Output to Terminal')
             group_terminal.add_argument('--quiet', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Enable/disable terminal outputs')
             group_terminal.add_argument('--animation', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Enable/disable animations for better compatibility')
             group_terminal.add_argument('--color', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Enable/disable colors for better compatibility')
-            group_terminal.add_argument('--show-source', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Show from which source each option is loaded')
-            group_terminal.add_argument('--show-value', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Show the value of each option')
-            group_terminal.add_argument('--freeze-args', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Freeze all given CLI arguments except --freeze-args to configure file. Existing option may be overwrote')
-            group_terminal.add_argument('--config', default=UNDEFINED, help='The path of a specific configure file to load. Set to "none" to skip loading configure file') # Special argument, don't go in the 4 layer loading.
+            group_terminal.add_argument('--force-error', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Forcefully output error notifies. Override --quiet')
+            group_terminal.add_argument('--force-warning', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Forcefully output warning notifies. Override --quiet')
+            group_terminal.add_argument('--force-info', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Forcefully output information notifies. Override --quiet')
+            group_terminal.add_argument('-f', '--force-notify', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Forcefully output all notifies. Override --quiet')
 
             group_file = self.public_parser.add_argument_group('Output to File')
             group_file.add_argument('--output-file', default=UNDEFINED, help='A path of a file to write outputs into')
