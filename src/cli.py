@@ -121,7 +121,9 @@ class Parser(argparse.ArgumentParser):
             group_request.add_argument('--user-agent', type=str, default=UNDEFINED, help='User-Agent to use in request headers')
             group_request.add_argument('--http-proxy', type=str, default=UNDEFINED, help='HTTP proxy to use. Use system proxy by default')
             group_request.add_argument('--https-proxy', type=str, default=UNDEFINED, help='HTTPS proxy to use. Use system proxy by default')
-            group_request.add_argument('-t', '--timeout', type=_get_validate_func('timeout'), default=UNDEFINED, help='Timeout in seconds')
+            group_request.add_argument('-t', '--timeout', type=_get_validate_func('timeout'), default=UNDEFINED, help='Overall timeout in seconds')
+            group_request.add_argument('--con-timeout', type=_get_validate_func('con_timeout'), default=UNDEFINED, help='Connect timeout in seconds. Prioritized over --timeout')
+            group_request.add_argument('--read-timeout', type=_get_validate_func('con_timeout'), default=UNDEFINED, help='Read timeout in seconds. Prioritized over --timeout')
 
             # ----- config parser -----
             config_parser = self._get_command_parser(command_sub, 'config', 'Edit and examine configure file')

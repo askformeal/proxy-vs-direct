@@ -8,6 +8,7 @@ class Validate:
             'bool': self.valid_bool,
             'str': self.valid_str,
             'pos_float': self.positive_float,
+            'optional_timeout': self.optional_timeout,
             'pos_int': self.positive_int,
             'output_mode': self.valid_output_mode,
             'path': self.valid_path
@@ -27,6 +28,16 @@ class Validate:
             if val <= 0:
                 return None
             return val
+
+    def optional_timeout(self, val):
+        if val == DISABLED:
+            return DISABLED
+        else:
+            valid_val = self.positive_float(val)
+            if valid_val is None:
+                return None
+            else:
+                return valid_val
 
     def positive_int(self, val):
         try:

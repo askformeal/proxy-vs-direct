@@ -22,6 +22,8 @@ OPTIONS_LITERAL = Literal[
     'http_proxy',
     'https_proxy',
     'timeout',
+    'con_timeout',
+    'read_timeout',
     'quiet',
     'animation',
     'color',
@@ -53,6 +55,8 @@ OPTION_TO_TAG = {
     'http_proxy': 'str',
     'https_proxy': 'str',
     'timeout': 'pos_float',
+    'con_timeout': 'optional_timeout',
+    'read_timeout': 'optional_timeout',
     'quiet': 'bool',
     'animation': 'bool',
     'color': 'bool',
@@ -70,6 +74,7 @@ TAG_TO_LABEL = { # type codename -> readable name
     'bool': 'boolean',
     'str': 'string',
     'pos_float': 'positive float',
+    'optional_timeout': 'positive float', # Optional timeout is basically positive float that supports DISABLED sentinal
     'output_mode': 'output mode',
     'path': 'file path'
 }
@@ -97,6 +102,8 @@ DEFAULTS = {
     'http_proxy': None,
     'https_proxy': None,
     'timeout': 5.0,
+    'con_timeout': DISABLED,
+    'read_timeout': DISABLED,
     'quiet': False,
     'animation': False,
     'color': False,

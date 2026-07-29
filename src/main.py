@@ -123,6 +123,8 @@ class ProxyVsDirect:
                 if self.option_source['https_proxy'] == 'default':
                     output.warning('No system HTTPS proxy found, and will use direct connection as default. You may want to define one manually using --https-proxy.')
 
+                self.contest.set_timeout()
+
                 self.plot.show_pk_start(self.contest.round, self.contest.timeout)
 
                 results = self.contest.pk()
@@ -143,6 +145,8 @@ class ProxyVsDirect:
                         except Exception:
                             # Error prompt already sent by FilePrompter. Nothing to do here.
                             ...
+                        else:
+                            output(f'Wrote result into {self.json}.')
 
                 if self.notify:
                     try:
@@ -226,7 +230,11 @@ class ProxyVsDirect:
         elif name == 'https_proxy':
             self.contest.proxies['https'] = val
         elif name == 'timeout':
-            self.contest.timeout = val
+            self.contest.overall_timeout = val
+        elif name == 'con_timeout':
+            self.contest.con_timeout = val
+        elif name == 'read_timeout':
+            self.contest.read_timeout = val
         elif name =='quiet':
             output.set_attr(quiet=val)
         elif name == 'animation':

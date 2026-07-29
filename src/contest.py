@@ -4,27 +4,40 @@ import time
 from datetime import datetime
 import requests
 
-from src.constants import PK_REFRESH_INTERVAL
+from src.constants import PK_REFRESH_INTERVAL, DISABLED
 from src.output import output
 
 class Contest:
     def __init__(self):
         self.url = ''
         self.round = 0
-        self.timeout = 0
+        self.overall_timeout = 0
+        self.con_timeout = 0
+        self.read_timeout = 0
         self.proxies = {}
         self.headers = {}
         self.decimals = 0
         self.animation = False
         self.plot = None
 
+        self.timeout = tuple()
         self.round_status = {'proxy': None, 'direct': None}
 
+    def set_timeout(self):
+        self.timeout = [self.overall_timeout, self.overall_timeout]
+        if self.con_timeout != DISABLED:
+            self.timeout[0] = self.con_timeout
+        if self.read_timeout != DISABLED:
+            self.timeout[1] = self.read_timeout
+        self.timeout = tuple(self.timeout)
+
     def pk(self):
+        self.set_timeout()
         results = {
             'url': self.url,
             'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            'timeout': self.timeout,
+            'connect_timeout': self.timeout[0],
+            'read_timeout': self.timeout[1],
             'decimals': self.decimals,
             'http_proxy': self.proxies['http'],
             'https_proxy': self.proxies['https'],
@@ -125,11 +138,12 @@ class Contest:
         return results
 
     def _start_test(self, name, proxies):
+
         result = self.test_url(self.url, proxies, self.timeout, self.headers, self.decimals)
         self.round_status[name] = result
 
     @staticmethod
-    def test_url(url, proxies=None, timeout=5, headers=None, decimals=2) -> dict:
+    def test_url(url, proxies, timeout, headers, decimals) -> dict:
         """Send requests and measure latency for a given URL and proxy config."""
         if proxies is None:
             proxies = {"http": None, "https": None}

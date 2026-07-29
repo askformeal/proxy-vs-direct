@@ -64,7 +64,11 @@ class Plot:
         output()
 
     def show_pk_start(self, round, timeout):
-        title = f'PROXY vs DIRECT: {round} request(s) each, {timeout}s timeout'
+        if timeout[0] == timeout[1]:
+            timeout_phrase = f'{timeout[0]}s timeout'
+        else:
+            timeout_phrase = f'{timeout[0]}s connect timeout, {timeout[1]}s read timeout'
+        title = f'PROXY vs DIRECT: {round} request(s) each, {timeout_phrase}'
         width = max(len(title) + 4, 50)
         output(f'{DIM}{"─" * width}{RESET}')
         output(f'{BOLD}{CYAN}  {title}{RESET}')
@@ -82,13 +86,14 @@ class Plot:
         output(f'{BOLD}{CYAN}  PK Result {results["time"]}{RESET}')
         output(f'{DIM}{"─" * width}{RESET}')
 
-        output(f'  {DIM}Rounds:{RESET}     [{results["completed"]}/{results["total"]}] completed')
-        output(f'  {DIM}URL:{RESET}        {results["url"]}')
-        output(f'  {DIM}HTTP Proxy:{RESET} {results["http_proxy"]}')
-        output(f'  {DIM}HTTPS Proxy:{RESET}{results["https_proxy"]}')
-        output(f'  {DIM}Timeout:{RESET}    {results["timeout"]}s')
-        output(f'  {DIM}Precision:{RESET}  {results["decimals"]} decimal place(s)')
-        output(f'  {DIM}Duration:{RESET}   {results["duration"]}s')
+        output(f'  {DIM}Rounds:{RESET}          [{results["completed"]}/{results["total"]}] completed')
+        output(f'  {DIM}URL:{RESET}             {results["url"]}')
+        output(f'  {DIM}HTTP Proxy:{RESET}      {results["http_proxy"]}')
+        output(f'  {DIM}HTTPS Proxy:{RESET}     {results["https_proxy"]}')
+        output(f'  {DIM}Connect Timeout:{RESET} {results["connect_timeout"]}s')
+        output(f'  {DIM}Read Timeout:{RESET}    {results["read_timeout"]}s')
+        output(f'  {DIM}Precision:{RESET}       {results["decimals"]} decimal place(s)')
+        output(f'  {DIM}Duration:{RESET}        {results["duration"]}s')
         output()
 
         # Proxy stats
