@@ -1,6 +1,6 @@
 from src.output import output
-from src.constants import BOLD, DIM, RED, GREEN, YELLOW, CYAN, RESET
-from src.constants import OPTIONS, SHOW_VALUE_MAX_LEN
+from src.constants import BOLD, DIM, MIN_BAR_WIDTH, RED, GREEN, YELLOW, CYAN, WHITE, RESET
+from src.constants import OPTIONS, SHOW_VALUE_MAX_LEN, BAR_COMPLETED, BAR_BLANK, BAR_PAD_WIDTH
 import time
 
 class Plot:
@@ -108,9 +108,11 @@ class Plot:
             proxy_average = f'{proxy_average}ms'
 
         output(f'  {proxy_color}{BOLD}Proxy{RESET}')
-        output(f'    {DIM}Score:{RESET}   {proxy_color}{proxy_score}{RESET}')
-        output(f'    {DIM}Failed:{RESET}  [{results["proxy_failed"]}/{results["completed"]}]')
-        output(f'    {DIM}Average:{RESET} {proxy_average}')
+        output(f'    {DIM}Score:{RESET}    {proxy_color}{proxy_score}{RESET}')
+        output(f'    {DIM}Failed:{RESET}   [{results["proxy_failed"]}/{results["completed"]}]')
+        output(f'    {DIM}Average:{RESET}  {proxy_average}')
+        output(f'    {DIM}Minimum:{RESET}  {results["proxy_min"]}')
+        output(f'    {DIM}Maximum:{RESET}  {results["proxy_max"]}')
         output()
 
         # Direct stats
@@ -123,9 +125,11 @@ class Plot:
             direct_average = f'{direct_average}ms'
 
         output(f'  {direct_color}{BOLD}Direct{RESET}')
-        output(f'    {DIM}Score:{RESET}   {direct_color}{direct_score}{RESET}')
-        output(f'    {DIM}Failed:{RESET}  [{results["direct_failed"]}/{results["completed"]}]')
-        output(f'    {DIM}Average:{RESET} {direct_average}')
+        output(f'    {DIM}Score:{RESET}    {direct_color}{direct_score}{RESET}')
+        output(f'    {DIM}Failed:{RESET}   [{results["direct_failed"]}/{results["completed"]}]')
+        output(f'    {DIM}Average:{RESET}  {direct_average}')
+        output(f'    {DIM}Minimum:{RESET}  {results["direct_min"]}')
+        output(f'    {DIM}Maximum:{RESET}  {results["direct_max"]}')
         output()
 
         # Overall
@@ -181,6 +185,27 @@ class Plot:
         proxy_info = self._gen_round_info('Proxy', round_status['proxy'], start_time)
         direct_info = self._gen_round_info('Direct', round_status['direct'], start_time)
         output(f'  {proxy_info} | {direct_info}', skip_file=skip_file)
+
+    def print_progress_bar(self, results, terminal_width):
+        ratio = results['completed']/results['total']
+        percent = f' {ratio*100:6.1f}%'
+
+        bar_width = terminal_width - (BAR_PAD_WIDTH * 2) - len(percent)
+
+        if bar_width >= MIN_BAR_WIDTH:
+            completed_width = int(round(bar_width * ratio))
+            blank_width = bar_width - completed_width
+
+            completed = BAR_COMPLETED * completed_width
+            blank = BAR_BLANK * blank_width
+
+            pad = ' ' * BAR_PAD_WIDTH
+
+            output(f'\n{pad}{GREEN}{completed}{WHITE}{blank}{RESET}{percent}{pad}')
+
+            return True
+        else:
+            return False
 
     def _gen_round_info(self, name, status, start_time):
         if status is None:

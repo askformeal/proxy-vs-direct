@@ -1,4 +1,5 @@
 from urllib.parse import urlparse
+import ipaddress
 from src.output import output
 from src.constants import OPTION_TO_TAG, DISABLED
 
@@ -53,11 +54,21 @@ class Validate:
         """Check if URL is valid, auto-add https:// if scheme missing."""
         result = urlparse(val)
         if result.scheme == '':
-            output.warning('No scheme found in given URL, and will use HTTPS scheme. All requests will fail if target server does not support HTTPS scheme.')
-            val = 'https://' + val
+            try:
+                ipaddress.ip_address(result.path.split(':')[0])
+            except ValueError:
+                scheme = 'https'
+            else:
+                scheme = 'http'
+
+            val = f'{scheme}://{val}'
+            output.warning(f'No scheme found in given URL, and will use {scheme.upper()} scheme. All requests will fail if target server does not support {scheme.upper()} scheme.')
             result = urlparse(val)
+
         if result.scheme in ('http', 'https') and result.netloc and ' ' not in result.netloc:
             return val
+        else:
+            return None
 
     def valid_bool(self, val):
         if isinstance(val, bool):

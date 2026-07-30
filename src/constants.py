@@ -161,7 +161,6 @@ HELP_BANNER_WIDE =  pyfiglet.figlet_format('Proxy vs Direct', font='ansi_shadow'
 
 MIN_BAR_WIDTH = 20
 BAR_PAD_WIDTH = 5
-BAR_DECIMALS = 1
 
 # BAR_COMPLETED = '━' # I might need this
 # BAR_BLANK = '─'

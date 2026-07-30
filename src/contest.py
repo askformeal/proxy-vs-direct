@@ -5,8 +5,7 @@ import time
 from datetime import datetime
 import requests
 
-from src.constants import PK_REFRESH_INTERVAL, MIN_BAR_WIDTH, BAR_PAD_WIDTH, BAR_COMPLETED, BAR_BLANK, BAR_DECIMALS, DISABLED
-from src.constants import GREEN, WHITE, RESET
+from src.constants import PK_REFRESH_INTERVAL, MIN_BAR_WIDTH, BAR_PAD_WIDTH, DISABLED
 from src.output import output
 
 class Contest:
@@ -55,6 +54,10 @@ class Contest:
             "direct_failed": 0,
             "proxy_average": 0,
             "direct_average": 0,
+            "proxy_min": 0,
+            "direct_min": 0,
+            "proxy_max": 0,
+            "direct_max": 0,
             "duration": 0
         }
         if results['http_proxy'] is None:
@@ -78,6 +81,11 @@ class Contest:
         start_time = time.time()
         proxy_latencies = []
         direct_latencies = []
+        proxy_min = None
+        proxy_max = 0
+        direct_min = None
+        direct_max = 0
+        terminal_width = 0
         try:
             for i in range(results['total']):
                 self.round_status = {'proxy': None, 'direct': None}
@@ -101,21 +109,12 @@ class Contest:
                                 output.warning('Failed to get terminal width, and progress bar will be disabled.')
                                 show_progress_bar = False
                             else:
-                                if terminal_width >= MIN_BAR_WIDTH + (BAR_PAD_WIDTH * 2):
+                                if self.plot.print_progress_bar(results, terminal_width):
                                     del_lines = 3
-
-                                    ratio = results['completed']/results['total']
-                                    percent = f' {ratio*100:6.1f}%'
-
-                                    bar_width = terminal_width - (BAR_PAD_WIDTH * 2) - len(percent)
-                                    completed_width = int(round(bar_width * ratio))
-                                    blank_width = bar_width - completed_width
-                                    completed = BAR_COMPLETED * completed_width
-                                    blank = BAR_BLANK * blank_width
-                                    pad = ' ' * BAR_PAD_WIDTH
-                                    output(f'\n{pad}{GREEN}{completed}{WHITE}{blank}{RESET}{percent}{pad}')
-
+                                    
+                                    
                         time.sleep(PK_REFRESH_INTERVAL)
+
                         for j in range(del_lines):
                             output('\033[F\033[K', end='', skip_file=True) # Delete last line
                     else:
@@ -138,12 +137,31 @@ class Contest:
                 results['direct_score'] += round_result['direct']
                 results['tie_count'] += round_result['tie']
 
-                proxy_latencies.append(self.round_status['proxy']['latency'])
-                direct_latencies.append(self.round_status['direct']['latency'])
+                proxy_latency = self.round_status['proxy']['latency']
+                direct_latency = self.round_status['direct']['latency']
+
+                proxy_latencies.append(proxy_latency)
+                direct_latencies.append(direct_latency)
+
+                proxy_max = max(proxy_max, proxy_latency)
+                direct_max = max(direct_max, direct_latency)
+
+                if proxy_min is None:
+                    proxy_min = proxy_latency
+                else:
+                    proxy_min = min(proxy_min, proxy_latency)
+
+                if direct_min is None:
+                    direct_min = direct_latency
+                else:
+                    direct_min = min(direct_min, direct_latency)
+
         except KeyboardInterrupt:
             output.info("PK stopped via keyboard interruption.")
             results['interrupted'] = True
 
+        if self.animation:
+            self.plot.print_progress_bar(results, terminal_width)
         results['proxy_failed'] = proxy_latencies.count(-1)
         results['direct_failed'] = direct_latencies.count(-1)
 
@@ -158,6 +176,16 @@ class Contest:
             results['direct_average'] = round(mean(direct_latencies), self.decimals)
         except StatisticsError:
             results['direct_average'] = -1
+
+        if proxy_min == -1:
+            proxy_min = 0
+        if direct_min == -1:
+            direct_min = 0
+
+        results['proxy_min'] = proxy_min
+        results['proxy_max'] = proxy_max
+        results['direct_min'] = direct_min
+        results['direct_max'] = direct_max
 
         end_time = time.time()
         results['duration'] = round(end_time-start_time, self.decimals)

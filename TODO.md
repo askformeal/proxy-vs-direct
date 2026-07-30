@@ -32,8 +32,8 @@
 - [X] Add `--config` option to specify configure file (set to "none" to skip loading configure file)
 - [X] Add customizable connect and read timeout
 - [X] Add progress bar
-- [ ] Add `--force-error`, `--force-warning`, `--force-info` and `--force-notify` options
-- [ ] Add min/max latency statistics
+- [X] Add `--force-error`, `--force-warning`, `--force-info` and `--force-notify` options
+- [X] Add min/max latency statistics
 - [ ] Add support for IP address
 - [ ] Add full page load test (JS, images, etc.) with render time recording
 - [ ] Add batch test (multiple URLs)
