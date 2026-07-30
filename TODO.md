@@ -34,7 +34,7 @@
 - [X] Add progress bar
 - [X] Add `--force-error`, `--force-warning`, `--force-info` and `--force-notify` options
 - [X] Add min/max latency statistics
-- [ ] Add support for IP address
+- [X] Add support for IP address
 - [ ] Add full page load test (JS, images, etc.) with render time recording
 - [ ] Add batch test (multiple URLs)
 - [ ] Add jitter plot

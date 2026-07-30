@@ -56,7 +56,7 @@ pvd <url>                                             # 'pk' is assumed when no 
 
 | Argument | Description | Default |
 |----------|-------------|---------|
-| `url` | Target URL to test (auto-adds `https://` if scheme missing) | required |
+| `url` | Target URL to test (auto-adds `http://` for IP addresses, `https://` for domains, if scheme missing) | required |
 | `-r, --round` | Number of rounds to PK | 5 |
 | `-t, --timeout` | Overall timeout in seconds (shared between connect and read) | 5.0 |
 | `--con-timeout` | Connect timeout in seconds. Prioritized over `--timeout` | disabled |
@@ -117,7 +117,7 @@ usage: proxy-vs-direct [--encoding ENCODING] [--quiet | --no-quiet]
                        [--output-mode {default,create,overwrite,append}]
                        {pk,config} ...
 
-Proxy vs Direct 0.6.1 - Make your proxy and direct connection PK on latency to
+Proxy vs Direct 0.6.2 - Make your proxy and direct connection PK on latency to
 a certain URL.
 
 positional arguments:
