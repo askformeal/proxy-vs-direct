@@ -119,7 +119,7 @@ class Parser(argparse.ArgumentParser):
             default_parser.add_argument('-j', '--json', default=UNDEFINED, help='A path of a json file to write PK result into')
             default_parser.add_argument('--overwrite-json', action=argparse.BooleanOptionalAction, default=UNDEFINED, help='Overwrite existing json file')
             default_parser.add_argument('-h', '--help', action=_HelpActionDefault, nargs=0, help='Show this help message and exit')
-            default_parser.add_argument('-v', '--version', action='version', version=f'%(prog)s {__version__}', help='Show version info')
+            default_parser.add_argument('-v', '--version', action='version', version=f'Proxy vs Direct {__version__}', help='Show version info')
 
             group_request = default_parser.add_argument_group('Request')
             group_request.add_argument('--user-agent', type=str, default=UNDEFINED, help='User-Agent to use in request headers')
